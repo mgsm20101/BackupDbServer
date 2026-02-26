@@ -1,0 +1,10 @@
+{
+  "Server": "localhost\\SQLEXPRESS",
+  "Username": "sa",
+  "Password": "Passw0rd",
+  "TempPath": "D:\\DbBack",
+  "BackupPath": "D:\\DbBackTemp",
+  "SelectedDatabases": [
+    "test"
+  ]
+}

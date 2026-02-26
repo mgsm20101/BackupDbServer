@@ -1,0 +1,19 @@
+{
+  "IsEnabled": true,
+  "IntervalHours": 12,
+  "NextBackupTime": "2025-07-13T09:14:46.4066385+03:00",
+  "DeleteOldBackups": true,
+  "RetentionDays": 7,
+  "SelectedDatabases": [
+    "test"
+  ],
+  "UseScheduledTime": true,
+  "ScheduledTime": "02:00:00",
+  "RunOnlyOnce": false,
+  "UploadToGoogleDrive": true,
+  "GoogleDriveCredentialsPath": "C:\\Users\\moham\\Downloads\\client_secret_1055618607096-t60etiejkshphoh0rua2gaj3b1hovvov.apps.googleusercontent.com (1).json",
+  "GoogleDriveFolderName": "Database Backups",
+  "DeleteLocalAfterUpload": true,
+  "UseGoogleDriveScheduledTime": false,
+  "GoogleDriveUploadTime": "01:00:00"
+}

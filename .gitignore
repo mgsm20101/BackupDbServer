@@ -1,0 +1,41 @@
+## [Visual Studio]
+.vs/
+
+## [Build Results]
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+## [User-specific files]
+*.user
+*.userosscache
+*.sln.docuser
+
+## [NuGet]
+packages/
+*.nupkg
+
+## [Artifacts]
+artifacts/
+
+## [Temp]
+tmp/
+
+## [Output]
+*.log
+*.bak
+*.zip
+*.json
+!auto_backup_config.json
+!scheduled_backup_config.json
+!daily_tasks.json
+!settings.json
+!test_settings.json
+
+## [Others]
+DriveCredentials/
+.agents/
+.agent/
+.claude/
+.specify/specs/
+.specify/memory/tasks.md

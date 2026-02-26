@@ -1,0 +1,249 @@
+<Window x:Class="BackupDbServer.Views.ScheduledBackupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:BackupDbServer.Converters"
+        Title="إعدادات الجدولة التلقائية للنسخ الاحتياطي" 
+        Height="700" Width="900"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResize">
+
+    <Window.Resources>
+        <converters:BoolToTextConverter x:Key="BoolToTextConverter"/>
+        <converters:TimeOnlyToStringConverter x:Key="TimeOnlyToStringConverter"/>
+        
+        <Style TargetType="GroupBox">
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Padding" Value="10"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="5"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <TabControl>
+            <!-- تبويب الإعدادات العامة -->
+            <TabItem Header="🕒 الجدولة">
+                <ScrollViewer>
+                    <StackPanel Margin="20">
+                        <!-- تفعيل الجدولة -->
+                        <GroupBox Header="تفعيل الجدولة التلقائية">
+                            <CheckBox Content="تفعيل الجدولة التلقائية للنسخ الاحتياطي" 
+                                      IsChecked="{Binding Config.IsEnabled}" 
+                                      FontSize="14" FontWeight="Bold"/>
+                        </GroupBox>
+
+                        <!-- جدولة الأيام -->
+                        <GroupBox Header="أيام الأسبوع">
+                            <WrapPanel>
+                                <CheckBox Content="الأحد" IsChecked="{Binding IsSundaySelected}" Margin="10,5"/>
+                                <CheckBox Content="الإثنين" IsChecked="{Binding IsMondaySelected}" Margin="10,5"/>
+                                <CheckBox Content="الثلاثاء" IsChecked="{Binding IsTuesdaySelected}" Margin="10,5"/>
+                                <CheckBox Content="الأربعاء" IsChecked="{Binding IsWednesdaySelected}" Margin="10,5"/>
+                                <CheckBox Content="الخميس" IsChecked="{Binding IsThursdaySelected}" Margin="10,5"/>
+                                <CheckBox Content="الجمعة" IsChecked="{Binding IsFridaySelected}" Margin="10,5"/>
+                                <CheckBox Content="السبت" IsChecked="{Binding IsSaturdaySelected}" Margin="10,5"/>
+                            </WrapPanel>
+                        </GroupBox>
+
+                        <!-- وقت التنفيذ -->
+                        <GroupBox Header="وقت التنفيذ">
+                            <StackPanel>
+                                <!-- استخدام القوائم فقط لتجنب مشاكل المحول -->
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="الساعة:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
+                                    <ComboBox Width="70" Height="30" SelectedValue="{Binding SelectedHour}" SelectedValuePath="Content">
+                                        <ComboBoxItem Content="0"/>
+                                        <ComboBoxItem Content="1"/>
+                                        <ComboBoxItem Content="2" IsSelected="True"/>
+                                        <ComboBoxItem Content="3"/>
+                                        <ComboBoxItem Content="4"/>
+                                        <ComboBoxItem Content="5"/>
+                                        <ComboBoxItem Content="6"/>
+                                        <ComboBoxItem Content="7"/>
+                                        <ComboBoxItem Content="8"/>
+                                        <ComboBoxItem Content="9"/>
+                                        <ComboBoxItem Content="10"/>
+                                        <ComboBoxItem Content="11"/>
+                                        <ComboBoxItem Content="12"/>
+                                        <ComboBoxItem Content="13"/>
+                                        <ComboBoxItem Content="14"/>
+                                        <ComboBoxItem Content="15"/>
+                                        <ComboBoxItem Content="16"/>
+                                        <ComboBoxItem Content="17"/>
+                                        <ComboBoxItem Content="18"/>
+                                        <ComboBoxItem Content="19"/>
+                                        <ComboBoxItem Content="20"/>
+                                        <ComboBoxItem Content="21"/>
+                                        <ComboBoxItem Content="22"/>
+                                        <ComboBoxItem Content="23"/>
+                                    </ComboBox>
+                                    
+                                    <TextBlock Text="الدقيقة:" VerticalAlignment="Center" Margin="20,0,10,0" FontWeight="Bold"/>
+                                    <ComboBox Width="70" Height="30" SelectedValue="{Binding SelectedMinute}" SelectedValuePath="Content">
+                                        <ComboBoxItem Content="0" IsSelected="True"/>
+                                        <ComboBoxItem Content="15"/>
+                                        <ComboBoxItem Content="30"/>
+                                        <ComboBoxItem Content="45"/>
+                                    </ComboBox>
+                                </StackPanel>
+                                
+                                <!-- عرض الوقت الحالي -->
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="الوقت المحدد:" FontWeight="Bold" Margin="0,0,10,0"/>
+                                    <TextBlock Text="{Binding DisplayScheduledTime}" FontWeight="Bold" Foreground="Blue" FontSize="14"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- معلومات الجدولة -->
+                        <GroupBox Header="معلومات الجدولة">
+                            <StackPanel>
+                                <TextBlock Text="{Binding NextBackupText}" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <TextBlock Text="{Binding LastBackupText}" Margin="0,0,0,5"/>
+                                <TextBlock Text="{Binding StatusText}" Foreground="Blue" FontWeight="Bold"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- أزرار التحكم -->
+                        <GroupBox Header="التحكم في الخدمة">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Content="💾 حفظ الإعدادات" Command="{Binding SaveCommand}" 
+                                        Width="120" Height="35" Background="LightGreen"/>
+                                <Button Content="▶ تشغيل الخدمة" Command="{Binding StartServiceCommand}" 
+                                        Width="120" Height="35" Background="LightBlue"
+                                        IsEnabled="{Binding CanStartService}"/>
+                                <Button Content="⏸ إيقاف الخدمة" Command="{Binding StopServiceCommand}" 
+                                        Width="120" Height="35" Background="LightCoral"
+                                        IsEnabled="{Binding IsServiceRunning}"/>
+                                <Button Content="🔥 تشغيل الآن" Command="{Binding RunBackupNowCommand}" 
+                                        Width="120" Height="35" Background="Orange"/>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- تبويب Windows Service -->
+            <TabItem Header="🛠️ خدمة Windows">
+                <ScrollViewer>
+                    <StackPanel Margin="20">
+                        <!-- معلومات الخدمة -->
+                        <GroupBox Header="معلومات خدمة Windows">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="حالة التثبيت:" 
+                                           FontWeight="Bold" Margin="0,0,10,5"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" FontWeight="Bold" Margin="0,0,0,5"
+                                           Text="{Binding IsWindowsServiceInstalled, Converter={StaticResource BoolToTextConverter}}"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="حالة الخدمة:" 
+                                           FontWeight="Bold" Margin="0,0,10,5"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding WindowsServiceStatus}" 
+                                           FontWeight="Bold" Margin="0,0,0,5"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="الوصف:" 
+                                           FontWeight="Bold" Margin="0,0,10,0"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" 
+                                           Text="خدمة Windows تعمل في الخلفية لتنفيذ النسخ الاحتياطي التلقائي حتى عند إغلاق البرنامج الرئيسي"
+                                           TextWrapping="Wrap"/>
+                            </Grid>
+                        </GroupBox>
+
+                        <!-- أزرار إدارة الخدمة -->
+                        <GroupBox Header="إدارة الخدمة">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                                    <Button Content="📦 تثبيت الخدمة" Command="{Binding InstallWindowsServiceCommand}" 
+                                            Width="120" Height="35" Background="LightGreen"
+                                            IsEnabled="{Binding CanInstallService}"/>
+                                    
+                                    <Button Content="🗑️ إلغاء التثبيت" Command="{Binding UninstallWindowsServiceCommand}" 
+                                            Width="120" Height="35" Background="LightCoral"
+                                            IsEnabled="{Binding CanUninstallService}"/>
+                                    
+                                    <Button Content="🔄 تحديث الحالة" Command="{Binding RefreshServiceStatusCommand}" 
+                                            Width="120" Height="35" Background="LightYellow"/>
+                                </StackPanel>
+                                
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Content="▶ تشغيل" Command="{Binding StartWindowsServiceCommand}" 
+                                            Width="100" Height="35" Background="LightBlue"
+                                            IsEnabled="{Binding CanStartWindowsService}"/>
+                                    
+                                    <Button Content="⏸ إيقاف" Command="{Binding StopWindowsServiceCommand}" 
+                                            Width="100" Height="35" Background="LightCoral"
+                                            IsEnabled="{Binding CanStopWindowsService}"/>
+                                    
+                                    <Button Content="🔄 إعادة تشغيل" Command="{Binding RestartWindowsServiceCommand}" 
+                                            Width="120" Height="35" Background="Orange"
+                                            IsEnabled="{Binding CanStopWindowsService}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- معلومات إضافية -->
+                        <GroupBox Header="ملاحظات مهمة">
+                            <StackPanel>
+                                <TextBlock Text="• يجب تشغيل البرنامج كمدير (Administrator) لتثبيت أو إلغاء تثبيت الخدمة" 
+                                           Foreground="Red" Margin="0,0,0,5" FontWeight="Bold"/>
+                                <TextBlock Text="• بعد تثبيت الخدمة، ستعمل تلقائياً عند بدء تشغيل Windows" 
+                                           Foreground="Green" Margin="0,0,0,5"/>
+                                <TextBlock Text="• يمكن إدارة الخدمة من services.msc أو من هذا البرنامج" 
+                                           Foreground="Blue" Margin="0,0,0,5"/>
+                                <TextBlock Text="• الخدمة ستقرأ الإعدادات من نفس الملفات المستخدمة في البرنامج الرئيسي" 
+                                           Foreground="Purple" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- تبويب السجل -->
+            <TabItem Header="📋 السجل">
+                <Grid Margin="20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- أزرار السجل -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,10">
+                        <Button Content="🔄 تحديث" Command="{Binding RefreshLogCommand}" 
+                                Width="80" Height="30"/>
+                        <Button Content="🗑️ مسح" Command="{Binding ClearLogCommand}" 
+                                Width="80" Height="30"/>
+                    </StackPanel>
+
+                    <!-- قائمة السجل -->
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding BackupHistory}"
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              AlternatingRowBackground="LightGray">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="الوقت" Binding="{Binding StartTime, StringFormat=yyyy-MM-dd HH:mm:ss}" Width="150"/>
+                            <DataGridTextColumn Header="الحالة" Binding="{Binding StatusText}" Width="80"/>
+                            <DataGridTextColumn Header="قواعد البيانات" Binding="{Binding DatabasesText}" Width="200"/>
+                            <DataGridTextColumn Header="المدة" Binding="{Binding DurationText}" Width="80"/>
+                            <DataGridTextColumn Header="رسالة الخطأ" Binding="{Binding ErrorMessage}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- زر الإغلاق -->
+        <Button Content="إغلاق" Click="CloseButton_Click" 
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" 
+                Width="80" Height="30" Margin="0,0,20,20"/>
+    </Grid>
+</Window>

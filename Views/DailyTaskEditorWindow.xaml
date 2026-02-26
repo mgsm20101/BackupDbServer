@@ -1,0 +1,136 @@
+<Window x:Class="BackupDbServer.Views.DailyTaskEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="تحرير المهمة اليومية" Height="650" Width="700"
+        FlowDirection="RightToLeft"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <Style x:Key="LabelStyle" TargetType="Label">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,5,5,0"/>
+        </Style>
+        <Style x:Key="TextBoxStyle" TargetType="TextBox">
+            <Setter Property="Margin" Value="0,5,0,0"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Height" Value="25"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- العنوان -->
+        <Border Grid.Row="0" Background="#FF3F51B5" Padding="10" CornerRadius="4" Margin="0,0,0,10">
+            <TextBlock Text="⚙ إعدادات المهمة اليومية"
+                       FontSize="16"
+                       FontWeight="Bold"
+                       Foreground="White"
+                       HorizontalAlignment="Center"/>
+        </Border>
+
+        <!-- المحتوى -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- الإعدادات الأساسية -->
+                <GroupBox Header="الإعدادات الأساسية" Margin="0,0,0,10" Padding="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Label Grid.Row="0" Grid.Column="0" Content="اسم المهمة:" Style="{StaticResource LabelStyle}"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" x:Name="TaskNameTextBox" Style="{StaticResource TextBoxStyle}"/>
+
+                        <CheckBox Grid.Row="1" Grid.Column="1" x:Name="IsEnabledCheckBox" Content="تفعيل المهمة" Margin="0,10,0,0"/>
+
+                        <Label Grid.Row="2" Grid.Column="0" Content="نوع المهمة:" Style="{StaticResource LabelStyle}"/>
+                        <ComboBox Grid.Row="2" Grid.Column="1" x:Name="TaskTypeComboBox" Margin="0,5,0,0" Height="25"
+                                  SelectionChanged="TaskTypeComboBox_SelectionChanged"/>
+
+                        <Label Grid.Row="3" Grid.Column="0" Content="وقت التنفيذ:" Style="{StaticResource LabelStyle}"/>
+                        <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,5,0,0">
+                            <TextBox x:Name="HourTextBox" Width="50" Height="25" Padding="5" Margin="0,0,5,0"/>
+                            <TextBlock Text=":" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <TextBox x:Name="MinuteTextBox" Width="50" Height="25" Padding="5"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+
+                <!-- إعدادات قاعدة البيانات -->
+                <GroupBox Header="قاعدة البيانات" Margin="0,0,0,10" Padding="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
+                                   Text="🔑 يتم استخدام إعدادات الاتصال الرئيسية من البرنامج" 
+                                   FontSize="11" Foreground="#FF4CAF50" Margin="0,0,0,10" FontWeight="Bold"/>
+
+                        <Label Grid.Row="1" Grid.Column="0" Content="قاعدة البيانات:" Style="{StaticResource LabelStyle}"/>
+                        <Grid Grid.Row="1" Grid.Column="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ComboBox Grid.Column="0" x:Name="DatabaseNameComboBox" 
+                                      Margin="0,5,0,0" Height="25" 
+                                      IsEditable="True"/>
+                            <Button Grid.Column="1" Content="🔄" Width="30" Height="25" 
+                                    Margin="5,5,0,0" ToolTip="تحديث قائمة قواعد البيانات"
+                                    Click="RefreshDatabases_Click"/>
+                        </Grid>
+                    </Grid>
+                </GroupBox>
+
+                <!-- محتوى المهمة -->
+                <GroupBox Header="محتوى المهمة" Margin="0,0,0,10" Padding="10">
+                    <StackPanel>
+                        <Label Content="نص SQL:" Style="{StaticResource LabelStyle}" x:Name="SqlScriptLabel"/>
+                        <TextBox x:Name="SqlScriptTextBox" 
+                                 Height="150" 
+                                 TextWrapping="Wrap" 
+                                 AcceptsReturn="True"
+                                 VerticalScrollBarVisibility="Auto"
+                                 FontFamily="Consolas"
+                                 Padding="5"
+                                 Margin="0,5,0,0"/>
+
+                        <Label Content="اسم الإجراء المخزن:" Style="{StaticResource LabelStyle}" x:Name="StoredProcLabel" Visibility="Collapsed"/>
+                        <TextBox x:Name="StoredProcedureTextBox" Style="{StaticResource TextBoxStyle}" Visibility="Collapsed"/>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- الأزرار -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+            <Button Content="✅ حفظ" Width="100" Height="35" Margin="5" 
+                    Background="#FF4CAF50" Foreground="White" FontSize="14" FontWeight="Bold"
+                    Click="SaveButton_Click"/>
+            <Button Content="❌ إلغاء" Width="100" Height="35" Margin="5"
+                    Background="#FFF44336" Foreground="White" FontSize="14" FontWeight="Bold"
+                    Click="CancelButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

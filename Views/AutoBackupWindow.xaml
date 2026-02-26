@@ -1,0 +1,556 @@
+﻿<Window x:Class="BackupDbServer.Views.AutoBackupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:BackupDbServer.Converters"
+        Title="النسخ الاحتياطي التلقائي" Height="700" Width="900"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <converters:TimeOnlyToStringConverter x:Key="TimeOnlyConverter"/>
+       
+
+        <Style x:Key="StatusLabelStyle" TargetType="Label">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Background" Value="LightGray"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsServiceRunning}" Value="True">
+                    <Setter Property="Background" Value="LightGreen"/>
+                    <Setter Property="Foreground" Value="DarkGreen"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsServiceRunning}" Value="False">
+                    <Setter Property="Background" Value="LightCoral"/>
+                    <Setter Property="Foreground" Value="DarkRed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- شريط الحالة العلوي -->
+        <Border Grid.Row="0" Background="#FF2196F3" Padding="10" CornerRadius="5" Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="نظام النسخ الاحتياطي التلقائي" 
+                           FontSize="16" FontWeight="Bold" Foreground="White" 
+                           VerticalAlignment="Center"/>
+
+                <Label Grid.Column="1" Content="{Binding ServiceStatusText}" 
+                       Style="{StaticResource StatusLabelStyle}"/>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="10,0,0,0">
+                    <Button Content="▶ تشغيل" Width="80" Height="30" Margin="2"
+                            Command="{Binding StartServiceCommand}"
+                            IsEnabled="{Binding IsServiceRunning }"/>
+                    <Button Content="⏸ إيقاف" Width="80" Height="30" Margin="2"
+                            Command="{Binding StopServiceCommand}"
+                            IsEnabled="{Binding IsServiceRunning}"/>
+                    <Button Content="🔄 تشغيل الآن" Width="100" Height="30" Margin="2"
+                            Command="{Binding RunBackupNowCommand}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- المحتوى الرئيسي -->
+        <TabControl Grid.Row="1" Margin="0,0,0,10">
+
+            <!-- تبويب الإعدادات العامة -->
+            <TabItem Header="الإعدادات العامة">
+                <ScrollViewer>
+                    <StackPanel Margin="10">
+
+                        <!-- إعدادات أساسية -->
+                        <GroupBox Header="إعدادات أساسية" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <CheckBox Grid.Row="0" Grid.ColumnSpan="2" 
+                                          Content="تفعيل النسخ الاحتياطي التلقائي"
+                                          IsChecked="{Binding Config.IsEnabled}" 
+                                          FontWeight="Bold" Margin="5"/>
+
+                                <Label Grid.Row="1" Grid.Column="0" Content="فترة التكرار (بالساعات):" 
+                                       VerticalAlignment="Center" Margin="5"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" 
+                                         Text="{Binding Config.IntervalHours}" 
+                                         Margin="5" Width="100" HorizontalAlignment="Left"/>
+
+                                <Label Grid.Row="2" Grid.Column="0" Content="النسخة التالية:" 
+                                       VerticalAlignment="Center" Margin="5"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" 
+                                           Text="{Binding Config.NextBackupTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" 
+                                           VerticalAlignment="Center" Margin="5" FontWeight="Bold"/>
+
+                                <CheckBox Grid.Row="3" Grid.ColumnSpan="2" 
+                                          Content="حذف النسخ القديمة تلقائياً"
+                                          IsChecked="{Binding Config.DeleteOldBackups}" 
+                                          Margin="5"/>
+                            </Grid>
+                        </GroupBox>
+
+                        <!-- إعدادات التوقيت -->
+                        <GroupBox Header="إعدادات التوقيت" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <CheckBox Grid.Row="0" Grid.ColumnSpan="2" 
+                                          Content="استخدام وقت محدد يومياً بدلاً من الفترة الزمنية"
+                                          IsChecked="{Binding Config.UseScheduledTime}" 
+                                          FontWeight="Bold" Margin="5"/>
+
+                                <Label Grid.Row="1" Grid.Column="0" Content="وقت النسخ الاحتياطي:" 
+                                       VerticalAlignment="Center" Margin="5"/>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="5">
+                                    <TextBox Text="{Binding Config.ScheduledTime, Converter={StaticResource TimeOnlyConverter}, UpdateSourceTrigger=LostFocus}" 
+                                             Width="60" IsEnabled="{Binding Config.UseScheduledTime}"/>
+                                    <TextBlock Text="(24 ساعة - مثال: 14:30)" 
+                                               VerticalAlignment="Center" Margin="10,0,0,0" 
+                                               Foreground="Gray"/>
+                                </StackPanel>
+
+                                <CheckBox Grid.Row="2" Grid.ColumnSpan="2" 
+                                          Content="تشغيل مرة واحدة فقط (بدلاً من يومياً)"
+                                          IsChecked="{Binding Config.RunOnlyOnce}" 
+                                          IsEnabled="{Binding Config.UseScheduledTime}"
+                                          Margin="5"/>
+
+                                <TextBlock Grid.Row="3" Grid.ColumnSpan="2" 
+                                           Text="ملاحظة: عند استخدام الوقت المحدد، سيتم تجاهل فترة التكرار" 
+                                           Margin="5" Foreground="Blue" FontStyle="Italic"
+                                           Visibility="{Binding Config.UseScheduledTime, Converter={StaticResource BoolToVis}}"/>
+                            </Grid>
+                        </GroupBox>
+
+                        <!-- إعدادات الاحتفاظ -->
+                        <GroupBox Header="إعدادات الاحتفاظ" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Label Grid.Row="0" Grid.Column="0" Content="الاحتفاظ بالنسخ لمدة (بالأيام):" 
+                                       VerticalAlignment="Center" Margin="5"/>
+                                <TextBox Grid.Row="0" Grid.Column="1" 
+                                         Text="{Binding Config.RetentionDays}" 
+                                         Margin="5" Width="100" HorizontalAlignment="Left"/>
+                            </Grid>
+                        </GroupBox>
+
+                        <!-- معلومات الجدولة الحالية -->
+                        <GroupBox Header="معلومات الجدولة الحالية" Margin="0,0,0,10"
+                                  Visibility="{Binding Config.IsEnabled, Converter={StaticResource BoolToVis}}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Label Grid.Row="0" Grid.Column="0" Content="حالة الخدمة:" 
+                                       VerticalAlignment="Center" Margin="5"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" 
+                                           Text="{Binding ServiceStatusText}" 
+                                           VerticalAlignment="Center" Margin="5" FontWeight="Bold">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsServiceRunning}" Value="True">
+                                                    <Setter Property="Foreground" Value="Green"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsServiceRunning}" Value="False">
+                                                    <Setter Property="Foreground" Value="Red"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <Label Grid.Row="1" Grid.Column="0" Content="نوع الجدولة:" 
+                                       VerticalAlignment="Center" Margin="5"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" 
+                                           VerticalAlignment="Center" Margin="5" FontWeight="Bold">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Config.UseScheduledTime}" Value="True">
+                                                    <Setter Property="Text" Value="وقت محدد يومياً"/>
+                                                    <Setter Property="Foreground" Value="Blue"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Config.UseScheduledTime}" Value="False">
+                                                    <Setter Property="Text" Value="فترة زمنية"/>
+                                                    <Setter Property="Foreground" Value="Orange"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <Label Grid.Row="2" Grid.Column="0" Content="النسخ التالي:" 
+                                       VerticalAlignment="Center" Margin="5"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" 
+                                           Text="{Binding Config.NextBackupTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" 
+                                           VerticalAlignment="Center" Margin="5" FontWeight="Bold" Foreground="Purple"/>
+
+                                <Label Grid.Row="3" Grid.Column="0" Content="قواعد البيانات:" 
+                                       VerticalAlignment="Center" Margin="5"/>
+                                <TextBlock Grid.Row="3" Grid.Column="1" 
+                                           Text="{Binding SelectedDatabasesText}" 
+                                           VerticalAlignment="Center" Margin="5" TextWrapping="Wrap"/>
+                            </Grid>
+                        </GroupBox>
+
+                        <!-- معلومات الجدولة الحالية -->
+                        <GroupBox Header="معلومات الجدولة الحالية" Margin="0,0,0,10"
+                                  Visibility="{Binding Config.IsEnabled, Converter={StaticResource BoolToVis}}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Label Grid.Row="0" Grid.Column="0" Content="حالة الخدمة:" 
+                                       VerticalAlignment="Center" Margin="5"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" 
+                                           Text="{Binding ServiceStatusText}" 
+                                           VerticalAlignment="Center" Margin="5" FontWeight="Bold">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsServiceRunning}" Value="True">
+                                                    <Setter Property="Foreground" Value="Green"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsServiceRunning}" Value="False">
+                                                    <Setter Property="Foreground" Value="Red"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <Label Grid.Row="1" Grid.Column="0" Content="نوع الجدولة:" 
+                                       VerticalAlignment="Center" Margin="5"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" 
+                                           VerticalAlignment="Center" Margin="5" FontWeight="Bold">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Config.UseScheduledTime}" Value="True">
+                                                    <Setter Property="Text" Value="وقت محدد يومياً"/>
+                                                    <Setter Property="Foreground" Value="Blue"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Config.UseScheduledTime}" Value="False">
+                                                    <Setter Property="Text" Value="فترة زمنية"/>
+                                                    <Setter Property="Foreground" Value="Orange"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <Label Grid.Row="2" Grid.Column="0" Content="النسخ التالي:" 
+                                       VerticalAlignment="Center" Margin="5"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" 
+                                           Text="{Binding Config.NextBackupTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" 
+                                           VerticalAlignment="Center" Margin="5" FontWeight="Bold" Foreground="Purple"/>
+
+                                <Label Grid.Row="3" Grid.Column="0" Content="قواعد البيانات:" 
+                                       VerticalAlignment="Center" Margin="5"/>
+                                <TextBlock Grid.Row="3" Grid.Column="1" 
+                                           Text="{Binding SelectedDatabasesText}" 
+                                           VerticalAlignment="Center" Margin="5" TextWrapping="Wrap"/>
+                            </Grid>
+                        </GroupBox>
+
+                        <!-- قواعد البيانات -->
+                        <GroupBox Header="قواعد البيانات المحددة" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="200"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,5">
+                                    <Button Content="تحديث القائمة" Width="100" Height="30"
+                                            Command="{Binding LoadDatabasesCommand}"/>
+                                    <TextBlock Text="{Binding AvailableDatabases.Count, StringFormat='المتاحة: {0}'}" 
+                                               VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </StackPanel>
+
+                                <ListBox Grid.Row="1" ItemsSource="{Binding AvailableDatabases}" 
+                                         ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Content="{Binding DatabaseName}" 
+                                                      IsChecked="{Binding IsSelected}"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
+                        </GroupBox>
+
+                        <!-- حفظ الإعدادات -->
+                        <Button Content="💾 حفظ الإعدادات" Width="150" Height="40" 
+                                Command="{Binding SaveConfigCommand}"
+                                HorizontalAlignment="Center" Margin="0,10,0,0"/>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- تبويب Google Drive -->
+            <TabItem Header="Google Drive">
+                <ScrollViewer>
+                    <StackPanel Margin="10">
+
+                        <!-- إعدادات Google Drive -->
+                        <GroupBox Header="إعدادات Google Drive" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <CheckBox Grid.Row="0" Grid.ColumnSpan="3" 
+                                          Content="رفع النسخ إلى Google Drive"
+                                          IsChecked="{Binding Config.UploadToGoogleDrive}" 
+                                          FontWeight="Bold" Margin="5"/>
+
+                                <Label Grid.Row="1" Grid.Column="0" Content="ملف الاعتماد:" 
+                                       VerticalAlignment="Center" Margin="5"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" 
+                                         Text="{Binding Config.GoogleDriveCredentialsPath}" 
+                                         Margin="5" IsReadOnly="True"/>
+                                <Button Grid.Row="1" Grid.Column="2" Content="استعراض..." 
+                                        Width="80" Margin="5"
+                                        Command="{Binding SelectGoogleCredentialsCommand}"/>
+
+                                <Label Grid.Row="2" Grid.Column="0" Content="اسم المجلد:" 
+                                       VerticalAlignment="Center" Margin="5"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" 
+                                         Text="{Binding Config.GoogleDriveFolderName}" 
+                                         Margin="5"/>
+
+                                <CheckBox Grid.Row="3" Grid.ColumnSpan="3" 
+                                          Content="حذف الملفات المحلية بعد الرفع"
+                                          IsChecked="{Binding Config.DeleteLocalAfterUpload}" 
+                                          Margin="5"/>
+
+                                <Button Grid.Row="4" Grid.Column="1" Content="🔗 اختبار الاتصال" 
+                                        Width="120" Height="35" Margin="5"
+                                        Command="{Binding TestGoogleDriveCommand}"
+                                        HorizontalAlignment="Left"/>
+                            </Grid>
+                        </GroupBox>
+
+                        <!-- إعدادات توقيت رفع Google Drive -->
+                        <GroupBox Header="إعدادات توقيت الرفع" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <CheckBox Grid.Row="0" Grid.ColumnSpan="2" 
+                                          Content="رفع إلى Google Drive في وقت محدد (بدلاً من الرفع الفوري)"
+                                          IsChecked="{Binding Config.UseGoogleDriveScheduledTime}" 
+                                          FontWeight="Bold" Margin="5"/>
+
+                                <Label Grid.Row="1" Grid.Column="0" Content="وقت الرفع:" 
+                                       VerticalAlignment="Center" Margin="5"/>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="5">
+                                    <TextBox Text="{Binding Config.GoogleDriveUploadTime, Converter={StaticResource TimeOnlyConverter}, UpdateSourceTrigger=LostFocus}" 
+                                             Width="60" IsEnabled="{Binding Config.UseGoogleDriveScheduledTime}"/>
+                                    <TextBlock Text="(24 ساعة - مثال: 03:00)" 
+                                               VerticalAlignment="Center" Margin="10,0,0,0" 
+                                               Foreground="Gray"/>
+                                </StackPanel>
+
+                                <TextBlock Grid.Row="2" Grid.ColumnSpan="2" 
+                                           Text="ملاحظة: عند تفعيل الرفع المجدول، ستتم إضافة الملفات إلى قائمة انتظار ليتم رفعها في الوقت المحدد يومياً" 
+                                           Margin="5" Foreground="Blue" FontStyle="Italic" TextWrapping="Wrap"
+                                           Visibility="{Binding Config.UseGoogleDriveScheduledTime, Converter={StaticResource BoolToVis}}"/>
+                            </Grid>
+                        </GroupBox>
+
+                        <!-- إرشادات إعداد Google Drive -->
+                        <GroupBox Header="إرشادات إعداد Google Drive" Margin="0,0,0,10">
+                            <TextBlock TextWrapping="Wrap" Margin="10">
+                                <Run Text="لإعداد Google Drive API:"/>
+                                <LineBreak/>
+                                <Run Text="1. انتقل إلى Google Cloud Console"/>
+                                <LineBreak/>
+                                <Run Text="2. إنشاء مشروع جديد أو اختر مشروع موجود"/>
+                                <LineBreak/>
+                                <Run Text="3. تفعيل Google Drive API"/>
+                                <LineBreak/>
+                                <Run Text="4. إنشاء بيانات اعتماد (OAuth 2.0)"/>
+                                <LineBreak/>
+                                <Run Text="5. تحميل ملف credentials.json"/>
+                                <LineBreak/>
+                                <Run Text="6. اختر الملف هنا واختبر الاتصال"/>
+                            </TextBlock>
+                        </GroupBox>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- تبويب سجل النسخ -->
+            <TabItem Header="سجل النسخ">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="آخر النسخ الاحتياطية" FontSize="16" FontWeight="Bold" 
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding RecentBackups.Count, StringFormat='({0} نسخة)'}" 
+                                   VerticalAlignment="Center" Margin="10,0,0,0"/>
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding RecentBackups}" 
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              HeadersVisibility="Column" CanUserSortColumns="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="قاعدة البيانات" Binding="{Binding DatabaseName}" Width="150"/>
+                            <DataGridTextColumn Header="وقت النسخ" 
+                                                Binding="{Binding BackupTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" 
+                                                Width="150"/>
+                            <DataGridTextColumn Header="الحالة" Binding="{Binding Status}" Width="100">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <Trigger Property="Text" Value="Success">
+                                                <Setter Property="Background" Value="LightGreen"/>
+                                                <Setter Property="Foreground" Value="DarkGreen"/>
+                                            </Trigger>
+                                            <Trigger Property="Text" Value="Failed">
+                                                <Setter Property="Background" Value="LightCoral"/>
+                                                <Setter Property="Foreground" Value="DarkRed"/>
+                                            </Trigger>
+                                            <Trigger Property="Text" Value="InProgress">
+                                                <Setter Property="Background" Value="LightYellow"/>
+                                                <Setter Property="Foreground" Value="DarkOrange"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="حجم الملف" Width="100">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="FileSizeBytes" StringFormat="{}{0:N0} bytes"/>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="المدة" Width="100">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="Duration" StringFormat="{}{0:hh\:mm\:ss}"/>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Google Drive" Width="100">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="GoogleDriveFileId" 
+                                            />
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="رسالة الخطأ" Binding="{Binding ErrorMessage}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+
+        <!-- شريط الحالة السفلي -->
+        <StatusBar Grid.Row="2" Height="40">
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="الحالة: " FontWeight="Bold" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding StatusText}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    
+                    <TextBlock Text="| الخدمة: " FontWeight="Bold" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                    <TextBlock Text="{Binding ServiceStatusText}" FontWeight="Bold" VerticalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsServiceRunning}" Value="True">
+                                        <Setter Property="Foreground" Value="Green"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsServiceRunning}" Value="False">
+                                        <Setter Property="Foreground" Value="Red"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    
+                    <TextBlock Text="| قواعد البيانات المحددة: " FontWeight="Bold" VerticalAlignment="Center" Margin="10,0,0,0" 
+                               Visibility="{Binding Config.IsEnabled, Converter={StaticResource BoolToVis}}"/>
+                    <TextBlock Text="{Binding SelectedDatabasesText}" VerticalAlignment="Center" MaxWidth="300" TextTrimming="CharacterEllipsis"
+                               Visibility="{Binding Config.IsEnabled, Converter={StaticResource BoolToVis}}"/>
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>

@@ -1,0 +1,15 @@
+{
+  "server": "MODIFIED_SERVER",
+  "username": "sa", 
+  "password": "Passw0rd",
+  "tempPath": "D:\\DbBackTemp",
+  "backupPath": "D:\\DbBack",
+  "selectedDatabases": [],
+  "useWindowsAuthentication": true,
+  "dockerContainerName": "dbs-2022-CTP23-1",
+  "connectionType": 0,
+  "port": 9999,
+  "connectionTimeout": 60,
+  "trustServerCertificate": false,
+  "encrypt": true
+}
