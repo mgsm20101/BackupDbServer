@@ -352,7 +352,7 @@ namespace BackupDbServer.Helpers
         /// <summary>
         /// الحصول على مسار ملف اعتماد Google Drive
         /// </summary>
-        private static string GetGoogleDriveCredentialsPath()
+        internal static string GetGoogleDriveCredentialsPath()
         {
             try
             {
