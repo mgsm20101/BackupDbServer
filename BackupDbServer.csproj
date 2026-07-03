@@ -12,6 +12,9 @@
     <!-- تحديد أيقونة التطبيق -->
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
 
+    <!-- بيان التطبيق: يطلب صلاحيات المسؤول لعمليات IIS وخدمة Windows -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
   </PropertyGroup>
 
   <ItemGroup>

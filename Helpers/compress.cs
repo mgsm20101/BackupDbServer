@@ -55,13 +55,14 @@ namespace BackupDbServer.Helpers
                 var zipFileName = Path.ChangeExtension(fileName, ".zip");
                 zipFilePath = Path.Combine(destinationFolder, zipFileName);
 
-                // إنشاء ملف ZIP
-                using (var zipArchive = ZipFile.Open(zipFilePath, ZipArchiveMode.Create))
+                // إنشاء ملف ZIP على خيط خلفي (عملية متزامنة ثقيلة على المعالج — يجب ألا تعمل على خيط الواجهة)
+                await Task.Run(() =>
                 {
+                    using var zipArchive = ZipFile.Open(zipFilePath, ZipArchiveMode.Create);
                     // إضافة الملف إلى الأرشيف مع ضغط أقصى
-                    var entry = zipArchive.CreateEntryFromFile(backupFilePath, fileName, CompressionLevel.Optimal);
-                    progress?.Report($"📦 تم إنشاء الأرشيف المضغوط: {zipFileName}");
-                }
+                    zipArchive.CreateEntryFromFile(backupFilePath, fileName, CompressionLevel.Optimal);
+                });
+                progress?.Report($"📦 تم إنشاء الأرشيف المضغوط: {zipFileName}");
 
                 // حساب نسبة الضغط
                 var compressedFileInfo = new FileInfo(zipFilePath);

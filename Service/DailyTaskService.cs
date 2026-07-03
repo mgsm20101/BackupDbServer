@@ -19,6 +19,7 @@ namespace BackupDbServer.Service
         private readonly System.Timers.Timer _checkTimer;
         private readonly string _configPath;
         private readonly HashSet<string> _executedToday;
+        private readonly HashSet<string> _runningTasks;
         private CancellationTokenSource? _cancellationTokenSource;
 
         public DailyTaskService(ILogger logger)
@@ -26,6 +27,7 @@ namespace BackupDbServer.Service
             _logger = logger;
             _tasks = new List<DailyTaskConfig>();
             _executedToday = new HashSet<string>();
+            _runningTasks = new HashSet<string>();
             _configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "daily_tasks.json");
             
             // تحميل المهام من الملف
@@ -66,8 +68,27 @@ namespace BackupDbServer.Service
 
                 foreach (var task in _tasks.Where(t => t.IsEnabled))
                 {
+                    // تخطّي المهام قيد التنفيذ حالياً (منع التنفيذ المزدوج)
+                    if (_runningTasks.Contains(task.TaskId))
+                        continue;
+
+                    if (task.Mode == ScheduleMode.Interval)
+                    {
+                        // نمط التكرار: التنفيذ إذا مرّت الفترة منذ آخر تنفيذ (أو لم يُنفّذ بعد)
+                        var interval = Math.Max(1, task.IntervalMinutes);
+                        if (task.LastExecutionTime == null ||
+                            (now - task.LastExecutionTime.Value).TotalMinutes >= interval)
+                        {
+                            _runningTasks.Add(task.TaskId);
+                            _ = ExecuteTaskAsync(task);
+                        }
+
+                        continue;
+                    }
+
+                    // النمط اليومي: مرة واحدة في اليوم عند الوقت المحدد
                     var taskKey = $"{currentDate:yyyy-MM-dd}_{task.TaskId}";
-                    
+
                     // تحقق إذا تم تنفيذ المهمة اليوم
                     if (_executedToday.Contains(taskKey))
                         continue;
@@ -75,11 +96,12 @@ namespace BackupDbServer.Service
                     // تحقق من وقت التنفيذ
                     var executionTime = task.ExecutionTime;
                     var targetTime = new DateTime(now.Year, now.Month, now.Day, executionTime.Hour, executionTime.Minute, 0);
-                    
+
                     // إذا حان وقت التنفيذ (مع هامش دقيقة واحدة)
                     if (Math.Abs((now - targetTime).TotalMinutes) <= 1)
                     {
                         _executedToday.Add(taskKey);
+                        _runningTasks.Add(task.TaskId);
                         _ = ExecuteTaskAsync(task);
                     }
                 }
@@ -142,6 +164,11 @@ namespace BackupDbServer.Service
                 
                 _logger.LogError($"فشل تنفيذ المهمة: {task.TaskName} - {ex.Message}", ex);
                 SaveTasks();
+            }
+            finally
+            {
+                // تحرير قفل التنفيذ للسماح بالتشغيل التالي في نمط التكرار
+                _runningTasks.Remove(task.TaskId);
             }
         }
 

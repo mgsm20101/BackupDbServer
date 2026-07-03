@@ -48,6 +48,39 @@ namespace BackupDbServer
                 return;
             }
 
+            // بوابة كلمة السر عند بدء التشغيل: إذا كانت الحماية مفعّلة، اطلبها فوراً قبل ظهور النافذة
+            var appLock = ServiceContainer.AppLock;
+            if (appLock.IsEnabled)
+            {
+                appLock.Lock();
+
+                // منع الإغلاق التلقائي عند إغلاق نافذة الحوار قبل إنشاء النافذة الرئيسية
+                var previousShutdownMode = ShutdownMode;
+                ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+                bool unlocked;
+                try
+                {
+                    unlocked = appLock.TryUnlock();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError("خطأ أثناء طلب كلمة السر عند بدء التشغيل", ex);
+                    Current.Shutdown();
+                    return;
+                }
+
+                ShutdownMode = previousShutdownMode;
+
+                if (!unlocked)
+                {
+                    // فشل/إلغاء إدخال كلمة السر — إنهاء التطبيق
+                    logger.LogWarning("تم إلغاء فتح البرنامج: لم تُدخَل كلمة السر الصحيحة عند بدء التشغيل");
+                    Current.Shutdown();
+                    return;
+                }
+            }
+
             logger.LogInformation("بدء تشغيل التطبيق مع نظام الحماية المفعل وServiceContainer");
             base.OnStartup(e);
         }

@@ -6,8 +6,11 @@
         xmlns:viewmodels="clr-namespace:BackupDbServer.ViewModels"
         xmlns:converters="clr-namespace:BackupDbServer.Converters"
         mc:Ignorable="d"
-        Title="تنفيذ سكربت SQL على القواعد المحددة" Height="600" Width="800"
-        WindowStartupLocation="CenterScreen">
+        Title="تنفيذ سكربت SQL على القواعد المحددة" Height="700" Width="900"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource MainBackgroundBrush}"
+        Foreground="{StaticResource TextMainBrush}"
+        FontFamily="{StaticResource ModernFontFamily}">
 
     <Window.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BoolToVis"/>
@@ -17,7 +20,7 @@
         <viewmodels:SqlExecutorViewModel />
     </Window.DataContext>
 
-    <Grid Margin="10">
+    <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -26,83 +29,140 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- عنوان النافذة -->
-        <Border Grid.Row="0" Background="#FF3F51B5" Padding="10" CornerRadius="4" Margin="0,0,0,10">
-            <TextBlock Text="تنفيذ سكربت SQL على القواعد المحددة" 
-                       FontSize="16" 
-                       FontWeight="Bold" 
-                       Foreground="White"
-                       HorizontalAlignment="Center"/>
+        <!-- عنوان النافذة المحدث -->
+        <Border Grid.Row="0" Style="{StaticResource ModernCardStyle}" Margin="0,0,0,16" Background="{StaticResource SurfaceBrush}" Padding="15">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Path Data="{StaticResource Icon.Link}" Fill="{StaticResource PrimaryAccentBrush}" Width="24" Height="24" Stretch="Uniform" Margin="0,0,12,0"/>
+                <TextBlock Text="تنفيذ سكربت SQL على القواعد المحددة" 
+                           Style="{StaticResource ModernHeaderStyle}"
+                           FontSize="20" 
+                           VerticalAlignment="Center"
+                           Margin="0"/>
+            </StackPanel>
         </Border>
 
         <!-- قواعد البيانات المحددة -->
-        <GroupBox Grid.Row="1" Header="قواعد البيانات المحددة" Margin="0,0,0,10">
-            <TextBlock Text="{Binding SelectedDatabasesText}" 
-                       FontWeight="Bold" 
-                       Foreground="DarkBlue"
-                       TextWrapping="Wrap"
-                       Margin="5"/>
-        </GroupBox>
+        <Border Grid.Row="1" Style="{StaticResource ModernCardStyle}" Margin="0,0,0,16">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                    <Path Data="{StaticResource Icon.Server}" Fill="{StaticResource PrimaryAccentBrush}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                    <TextBlock Text="قواعد البيانات المحددة" Style="{StaticResource ModernHeaderStyle}" FontSize="14" Margin="0"/>
+                </StackPanel>
+                <TextBlock Text="{Binding SelectedDatabasesText}" 
+                           FontWeight="Medium" 
+                           Foreground="{StaticResource PrimaryAccentBrush}"
+                           TextWrapping="Wrap"
+                           FontSize="13"/>
+            </StackPanel>
+        </Border>
 
         <!-- منطقة إدخال السكربت -->
-        <GroupBox Grid.Row="2" Header="سكربت SQL">
+        <Border Grid.Row="2" Style="{StaticResource ModernCardStyle}" Margin="0,0,0,16">
             <Grid>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBox Grid.Row="0" 
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                    <Path Data="{StaticResource Icon.Link}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                    <TextBlock Text="سكربت SQL" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                </StackPanel>
+
+                <TextBox Grid.Row="1" 
                          Text="{Binding SqlScript, UpdateSourceTrigger=PropertyChanged}" 
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
                          VerticalScrollBarVisibility="Auto"
                          HorizontalScrollBarVisibility="Auto"
                          FontFamily="Consolas"
-                         FontSize="12"
-                         Margin="5"/>
+                         FontSize="13"
+                         Background="{StaticResource MainBackgroundBrush}"
+                         Foreground="{StaticResource TextMainBrush}"
+                         BorderBrush="{StaticResource SurfaceBrush}"
+                         Padding="12"/>
 
-                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
-                    <Button Content=" تحميل من ملف" Width="120" Height="30" Margin="5,0"
-                            Command="{Binding LoadScriptFromFileCommand}"/>
-                    <Button Content=" حفظ في ملف" Width="120" Height="30" Margin="5,0"
-                            Command="{Binding SaveScriptToFileCommand}"/>
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+                    <Button Width="150" Height="35" Margin="10,0,0,0"
+                            Style="{StaticResource ModernActionButtonStyle}"
+                            Command="{Binding LoadScriptFromFileCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="{StaticResource Icon.Folder}" Fill="{StaticResource MainBackgroundBrush}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0"/>
+                            <TextBlock Text="تحميل من ملف"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Width="150" Height="35" Margin="10,0,0,0"
+                            Style="{StaticResource ModernActionButtonStyle}"
+                            Command="{Binding SaveScriptToFileCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="{StaticResource Icon.Save}" Fill="{StaticResource MainBackgroundBrush}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0"/>
+                            <TextBlock Text="حفظ في ملف"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Grid>
-        </GroupBox>
+        </Border>
 
         <!-- منطقة النتائج -->
-        <GroupBox Grid.Row="3" Header="نتائج التنفيذ" Height="150" Margin="0,10,0,0">
-            <TextBox Text="{Binding ExecutionResults}" 
-                     IsReadOnly="True"
-                     AcceptsReturn="True"
-                     TextWrapping="Wrap"
-                     VerticalScrollBarVisibility="Auto"
-                     HorizontalScrollBarVisibility="Auto"
-                     FontFamily="Consolas"
-                     FontSize="11"
-                     Background="LightGray"
-                     Margin="5"/>
-        </GroupBox>
+        <Border Grid.Row="3" Style="{StaticResource ModernCardStyle}" Height="180" Margin="0,0,0,16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-        <!-- أزرار التحكم -->
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <Button Content=" تنفيذ السكربت" Width="130" Height="35" Margin="5,0"
-                    Command="{Binding ExecuteScriptCommand}"
-                    IsEnabled="{Binding !IsBusy}"
-                    Background="Green"
-                    Foreground="White"
-                    FontWeight="Bold"/>
-            
-            <Button Content=" إلغاء" Width="80" Height="35" Margin="5,0"
-                    Click="CancelButton_Click"/>
-        </StackPanel>
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                    <Path Data="{StaticResource Icon.History}" Fill="{StaticResource PrimaryAccentBrush}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                    <TextBlock Text="نتائج التنفيذ" Style="{StaticResource ModernHeaderStyle}" FontSize="14" Margin="0"/>
+                </StackPanel>
 
-        <!-- شريط التقدم -->
-        <ProgressBar Grid.Row="4" 
-                     Height="4" 
-                     Margin="0,5,0,0"
-                     IsIndeterminate="{Binding IsBusy}"
-                     Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}"/>
+                <TextBox Grid.Row="1" Text="{Binding ExecutionResults}" 
+                         IsReadOnly="True"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto"
+                         FontFamily="Consolas"
+                         FontSize="12"
+                         Background="{StaticResource MainBackgroundBrush}"
+                         Foreground="{StaticResource TextSubBrush}"
+                         BorderBrush="{StaticResource SurfaceBrush}"
+                         Padding="10"/>
+            </Grid>
+        </Border>
+
+        <!-- أزرار التحكم وشريط التقدم -->
+        <Grid Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <ProgressBar Grid.Column="0" 
+                         Height="8" 
+                         VerticalAlignment="Center"
+                         Margin="0,0,20,0"
+                         IsIndeterminate="{Binding IsBusy}"
+                         Style="{StaticResource ModernProgressBarStyle}"
+                         Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}"/>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Width="150" Height="40" Margin="10,0,0,0"
+                        Command="{Binding ExecuteScriptCommand}"
+                        IsEnabled="{Binding !IsBusy}"
+                        Style="{StaticResource ModernActionButtonStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource Icon.Link}" Fill="{StaticResource MainBackgroundBrush}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                        <TextBlock Text="تنفيذ السكربت" FontWeight="Bold"/>
+                    </StackPanel>
+                </Button>
+                
+                <Button Content="إلغاء" Width="100" Height="40" Margin="10,0,0,0"
+                        Style="{StaticResource ModernActionButtonStyle}"
+                        Click="CancelButton_Click"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>
+

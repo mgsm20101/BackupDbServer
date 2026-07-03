@@ -82,6 +82,16 @@ namespace BackupDbServer.Helpers
                                 var mainWindow = System.Windows.Application.Current.MainWindow;
                                 if (mainWindow != null)
                                 {
+                                    // بوابة القفل: اطلب كلمة السر قبل الإظهار إن كان مقفلاً
+                                    var appLock = ServiceContainer.AppLock;
+                                    if (appLock.IsEnabled && appLock.IsLocked)
+                                    {
+                                        if (!appLock.TryUnlock(mainWindow))
+                                        {
+                                            return;
+                                        }
+                                    }
+
                                     if (mainWindow.WindowState == WindowState.Minimized)
                                     {
                                         mainWindow.WindowState = WindowState.Normal;

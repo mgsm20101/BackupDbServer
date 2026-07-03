@@ -1,6 +1,7 @@
 ﻿using BackupDbServer.Helpers; // يحتوي على SettingsManager و BackupConfig
 using BackupDbServer.Models;
 using BackupDbServer.Services;
+using BackupDbServer.Views;
 using Microsoft.Data.SqlClient;
 using System.Windows;
 using System.Windows.Input;
@@ -176,6 +177,18 @@ namespace BackupDbServer.ViewModels
         private string _password = string.Empty;
         public string Password { get { return _password; } set { _password = value; OnPropertyChanged(); UpdateConnectionString(); } }
 
+        // ===== حماية البرنامج بكلمة سر =====
+        public bool IsAppLockEnabled => ServiceContainer.AppLock.IsEnabled;
+        public bool IsAppPasswordSet => ServiceContainer.AppLock.IsPasswordSet;
+        public string AppLockStatusText => IsAppLockEnabled ? "🟢 الحماية مفعّلة" : "⚪ الحماية غير مفعّلة";
+        public string SetPasswordButtonText => IsAppPasswordSet ? "تغيير كلمة السر" : "تعيين كلمة السر";
+
+        /// <summary>مسار ملف الاسترجاع السري (الطريق الخلفي عند نسيان كلمة السر).</summary>
+        public string ResetFilePath => ServiceContainer.AppLock.ResetFilePath;
+
+        public ICommand SetOrChangePasswordCommand { get; private set; } = null!;
+        public ICommand DisableAppLockCommand { get; private set; } = null!;
+
         public SettingsViewModel()
         {
             _logger = ServiceContainer.Logger; // استخدام ServiceContainer
@@ -192,9 +205,60 @@ namespace BackupDbServer.ViewModels
             CreateDockerContainerCommand = new AsyncRelayCommand(CreateDockerContainerAsync);
             StartDockerContainerCommand = new AsyncRelayCommand(StartDockerContainerAsync);
             StopDockerContainerCommand = new AsyncRelayCommand(StopDockerContainerAsync);
+            SetOrChangePasswordCommand = new RelayCommand(SetOrChangePassword);
+            DisableAppLockCommand = new RelayCommand(DisableAppLock);
 
             // تحديث حالة Docker عند التشغيل
             _ = UpdateDockerStatusAsync();
+        }
+
+        /// <summary>تعيين كلمة سر جديدة أو تغيير الحالية.</summary>
+        private void SetOrChangePassword(object? parameter)
+        {
+            var appLock = ServiceContainer.AppLock;
+            var mode = appLock.IsPasswordSet ? PasswordPromptMode.Change : PasswordPromptMode.Setup;
+            var dialog = new PasswordPromptWindow(appLock, mode);
+            if (parameter is Window owner) dialog.Owner = owner;
+
+            if (dialog.ShowDialog() == true)
+            {
+                System.Windows.MessageBox.Show("✅ تم حفظ كلمة السر وتفعيل الحماية.", "تم",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                RefreshAppLockState();
+            }
+        }
+
+        /// <summary>تعطيل الحماية بعد التحقق من كلمة السر الحالية.</summary>
+        private void DisableAppLock(object? parameter)
+        {
+            var appLock = ServiceContainer.AppLock;
+            if (!appLock.IsPasswordSet)
+            {
+                System.Windows.MessageBox.Show("لا توجد كلمة سر مُعيّنة.", "تنبيه",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // التحقق من كلمة السر الحالية عبر نافذة فك القفل
+            var verifyDialog = new PasswordPromptWindow(appLock, PasswordPromptMode.Unlock);
+            if (parameter is Window owner) verifyDialog.Owner = owner;
+
+            if (verifyDialog.ShowDialog() == true)
+            {
+                // تم التحقق من كلمة السر عبر النافذة — تعطيل مباشر
+                appLock.ForceDisable();
+                System.Windows.MessageBox.Show("تم تعطيل الحماية بكلمة السر.", "تم",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                RefreshAppLockState();
+            }
+        }
+
+        private void RefreshAppLockState()
+        {
+            OnPropertyChanged(nameof(IsAppLockEnabled));
+            OnPropertyChanged(nameof(IsAppPasswordSet));
+            OnPropertyChanged(nameof(AppLockStatusText));
+            OnPropertyChanged(nameof(SetPasswordButtonText));
         }
 
         private void UpdateConnectionString()

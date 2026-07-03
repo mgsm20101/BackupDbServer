@@ -7,126 +7,120 @@
         xmlns:vm="clr-namespace:BackupDbServer.ViewModels"
         xmlns:converters="clr-namespace:BackupDbServer.Converters"
         mc:Ignorable="d"
-        Title="نشر التطبيق الآلي" Height="700" Width="900"
+        Title="نشر التطبيق الآلي" Height="750" Width="950"
         FlowDirection="RightToLeft"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource MainBackgroundBrush}"
+        Foreground="{StaticResource TextMainBrush}"
+        FontFamily="{StaticResource ModernFontFamily}">
 
     <Window.Resources>
         <!-- Converters -->
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
-        
-        <Style x:Key="GroupBoxStyle" TargetType="GroupBox">
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="Padding" Value="10"/>
-            <Setter Property="BorderBrush" Value="LightGray"/>
-            <Setter Property="BorderThickness" Value="1"/>
-        </Style>
-
-        <Style x:Key="LabelStyle" TargetType="Label">
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Margin" Value="0,5,5,0"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-
-        <Style x:Key="TextBoxStyle" TargetType="TextBox">
-            <Setter Property="Margin" Value="0,5,0,0"/>
-            <Setter Property="Padding" Value="5"/>
-            <Setter Property="Height" Value="25"/>
-        </Style>
-
-        <Style x:Key="ButtonStyle" TargetType="Button">
-            <Setter Property="Padding" Value="10,5"/>
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="FontSize" Value="12"/>
-        </Style>
     </Window.Resources>
-
-    
 
     <Window.DataContext>
         <vm:DeployViewModel/>
     </Window.DataContext>
 
-    <Grid Margin="10">
+    <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- شريط العنوان -->
-        <Border Grid.Row="0" Background="#FF3F51B5" Padding="10" CornerRadius="4" Margin="0,0,0,10">
-            <TextBlock Text="نشر التطبيق الآلي على IIS"
-                       FontSize="18"
-                       FontWeight="Bold"
-                       Foreground="White"
-                       HorizontalAlignment="Center"/>
+        <!-- شريط العنوان المحدث -->
+        <Border Grid.Row="0" Style="{StaticResource ModernCardStyle}" Margin="0,0,0,16" Background="{StaticResource SurfaceBrush}" Padding="15">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Path Data="{StaticResource Icon.Server}" Fill="{StaticResource PrimaryAccentBrush}" Width="24" Height="24" Stretch="Uniform" Margin="0,0,12,0"/>
+                <TextBlock Text="نشر التطبيق الآلي على IIS" 
+                           Style="{StaticResource ModernHeaderStyle}"
+                           FontSize="20" 
+                           VerticalAlignment="Center"
+                           Margin="0"/>
+            </StackPanel>
         </Border>
 
         <!-- تبويبات الإعدادات -->
-        <TabControl Grid.Row="1" Margin="0,0,0,10">
+        <TabControl Grid.Row="1">
             <!-- تبويب إعدادات SQL -->
             <TabItem Header="إعدادات SQL Server">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10">
-                        <GroupBox Header="إعدادات الاتصال" Style="{StaticResource GroupBoxStyle}">
-                            <Grid Margin="5">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                    <StackPanel Margin="16">
+                        <Border Style="{StaticResource ModernCardStyle}">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                                    <Path Data="{StaticResource Icon.Link}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                                    <TextBlock Text="إعدادات الاتصال" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                                </StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                                <Label Grid.Row="0" Grid.Column="0" Content="خادم SQL:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Config.SqlServer}" Style="{StaticResource TextBoxStyle}"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="خادم SQL:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Config.SqlServer}" Height="35" Margin="0,0,0,12"/>
 
-                                <Label Grid.Row="1" Grid.Column="0" Content="اسم المستخدم:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Config.SqlAuthUser}" Style="{StaticResource TextBoxStyle}"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="اسم المستخدم:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Config.SqlAuthUser}" Height="35" Margin="0,0,0,12"/>
 
-                                <Label Grid.Row="2" Grid.Column="0" Content="كلمة المرور:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Config.SqlAuthPassword}" Style="{StaticResource TextBoxStyle}"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="كلمة المرور:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Config.SqlAuthPassword}" Height="35" Margin="0,0,0,12"/>
 
-                                <CheckBox Grid.Row="3" Grid.Column="1" Content="استخدام المصادقة المتكاملة (Windows Auth)"
-                                         IsChecked="{Binding Config.UseIntegratedSecurity}" Margin="0,10,0,0"/>
-                            </Grid>
-                        </GroupBox>
+                                    <CheckBox Grid.Row="3" Grid.Column="1" Content="استخدام المصادقة المتكاملة (Windows Auth)"
+                                              IsChecked="{Binding Config.UseIntegratedSecurity}" Foreground="{StaticResource TextMainBrush}"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
 
-                        <GroupBox Header="استعادة قاعدة البيانات" Style="{StaticResource GroupBoxStyle}">
-                            <Grid Margin="5">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                        <Border Style="{StaticResource ModernCardStyle}">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                                    <Path Data="{StaticResource Icon.Refresh}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                                    <TextBlock Text="استعادة قاعدة البيانات" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                                </StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                                <Label Grid.Row="0" Grid.Column="0" Content="ملف .bak:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Config.BakPath}" Style="{StaticResource TextBoxStyle}"/>
-                                <Button Grid.Row="0" Grid.Column="2" Content="تصفح..." Command="{Binding BrowseBakFileCommand}" Style="{StaticResource ButtonStyle}"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="ملف .bak:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Config.BakPath}" Height="35" Margin="0,0,10,12"/>
+                                    <Button Grid.Row="0" Grid.Column="2" Command="{Binding BrowseBakFileCommand}" Width="100" Height="35" Margin="0,0,0,12" Style="{StaticResource ModernActionButtonStyle}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Path Data="{StaticResource Icon.Folder}" Fill="{StaticResource MainBackgroundBrush}" Width="12" Height="12" Stretch="Uniform" Margin="0,0,6,0"/>
+                                            <TextBlock Text="تصفح..."/>
+                                        </StackPanel>
+                                    </Button>
 
-                                <Label Grid.Row="1" Grid.Column="0" Content="اسم قاعدة البيانات الجديدة:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Config.NewDatabaseName}" Style="{StaticResource TextBoxStyle}"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="اسم قاعدة البيانات الجديدة:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Config.NewDatabaseName}" Height="35" Margin="0,0,0,12" Grid.ColumnSpan="2"/>
 
-                                <Label Grid.Row="2" Grid.Column="0" Content="مجلد ملفات البيانات:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Config.DataFilesDir}" Style="{StaticResource TextBoxStyle}"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="مجلد ملفات البيانات:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Config.DataFilesDir}" Height="35" Margin="0,0,0,12" Grid.ColumnSpan="2"/>
 
-                                <CheckBox Grid.Row="3" Grid.Column="1" Content="استبدال إذا كانت موجودة"
-                                         IsChecked="{Binding Config.WithReplace}" Margin="0,10,0,0"/>
-                            </Grid>
-                        </GroupBox>
+                                    <CheckBox Grid.Row="3" Grid.Column="1" Content="استبدال إذا كانت موجودة"
+                                              IsChecked="{Binding Config.WithReplace}" Foreground="{StaticResource TextMainBrush}" Grid.ColumnSpan="2"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -134,68 +128,80 @@
             <!-- تبويب إعدادات الشركة والترخيص -->
             <TabItem Header="الشركة والترخيص">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10">
-                        <GroupBox Header="تحديث بيانات الشركة" Style="{StaticResource GroupBoxStyle}">
-                            <Grid Margin="5">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                    <StackPanel Margin="16">
+                        <Border Style="{StaticResource ModernCardStyle}">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                                    <Path Data="{StaticResource Icon.World}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                                    <TextBlock Text="تحديث بيانات الشركة" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                                </StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                                <Label Grid.Row="0" Grid.Column="0" Content="جدول الشركة:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Config.CompanyTable}" Style="{StaticResource TextBoxStyle}"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="جدول الشركة:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Config.CompanyTable}" Height="35" Margin="0,0,0,12"/>
 
-                                <Label Grid.Row="1" Grid.Column="0" Content="عمود الاسم:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Config.CompanyNameColumn}" Style="{StaticResource TextBoxStyle}"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="عمود الاسم:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Config.CompanyNameColumn}" Height="35" Margin="0,0,0,12"/>
 
-                                <Label Grid.Row="2" Grid.Column="0" Content="عمود المفتاح:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Config.CompanyKeyColumn}" Style="{StaticResource TextBoxStyle}"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="عمود المفتاح:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Config.CompanyKeyColumn}" Height="35" Margin="0,0,0,12"/>
 
-                                <Label Grid.Row="3" Grid.Column="0" Content="قيمة المفتاح:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Config.CompanyKeyValue}" Style="{StaticResource TextBoxStyle}"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="قيمة المفتاح:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Config.CompanyKeyValue}" Height="35" Margin="0,0,0,12"/>
 
-                                <Label Grid.Row="4" Grid.Column="0" Content="الاسم الجديد للشركة:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Config.NewCompanyDisplayName}" Style="{StaticResource TextBoxStyle}"/>
-                            </Grid>
-                        </GroupBox>
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="الاسم الجديد للشركة:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,0"/>
+                                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Config.NewCompanyDisplayName}" Height="35"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
 
-                        <GroupBox Header="إضافة ترخيص" Style="{StaticResource GroupBoxStyle}">
-                            <Grid Margin="5">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                        <Border Style="{StaticResource ModernCardStyle}">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                                    <Path Data="{StaticResource Icon.Lock}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                                    <TextBlock Text="إضافة ترخيص" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                                </StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                                <Label Grid.Row="0" Grid.Column="0" Content="قاعدة بيانات الترخيص:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Config.LicenseDbName}" Style="{StaticResource TextBoxStyle}"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="قاعدة بيانات الترخيص:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Config.LicenseDbName}" Height="35" Margin="0,0,0,12"/>
 
-                                <Label Grid.Row="1" Grid.Column="0" Content="جدول الترخيص:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Config.LicenseTable}" Style="{StaticResource TextBoxStyle}"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="جدول الترخيص:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Config.LicenseTable}" Height="35" Margin="0,0,0,12"/>
 
-                                <Label Grid.Row="2" Grid.Column="0" Content="عمود معرف الشركة:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Config.LicenseCompanyIdColumn}" Style="{StaticResource TextBoxStyle}"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="عمود معرف الشركة:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Config.LicenseCompanyIdColumn}" Height="35" Margin="0,0,0,12"/>
 
-                                <Label Grid.Row="3" Grid.Column="0" Content="مفتاح الترخيص:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Config.LicenseKeyValue}" Style="{StaticResource TextBoxStyle}"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="مفتاح الترخيص:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Config.LicenseKeyValue}" Height="35" Margin="0,0,0,12"/>
 
-                                <Label Grid.Row="4" Grid.Column="0" Content="تاريخ الانتهاء:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Config.LicenseExpiry, StringFormat='yyyy-MM-dd'}" Style="{StaticResource TextBoxStyle}"/>
-                            </Grid>
-                        </GroupBox>
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="تاريخ الانتهاء:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,0"/>
+                                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Config.LicenseExpiry, StringFormat='yyyy-MM-dd'}" Height="35"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -203,80 +209,103 @@
             <!-- تبويب إعدادات IIS -->
             <TabItem Header="إعدادات IIS">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10">
-                        <GroupBox Header="حزمة التطبيق" Style="{StaticResource GroupBoxStyle}">
-                            <Grid Margin="5">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                    <StackPanel Margin="16">
+                        <Border Style="{StaticResource ModernCardStyle}">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                                    <Path Data="{StaticResource Icon.Folder}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                                    <TextBlock Text="حزمة التطبيق" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                                </StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                                <Label Grid.Row="0" Grid.Column="0" Content="ملف الحزمة (.zip):" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Config.ZipPackagePath}" Style="{StaticResource TextBoxStyle}"/>
-                                <Button Grid.Row="0" Grid.Column="2" Content="تصفح..." Command="{Binding BrowseZipFileCommand}" Style="{StaticResource ButtonStyle}"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="ملف الحزمة (.zip):" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Config.ZipPackagePath}" Height="35" Margin="0,0,10,12"/>
+                                    <Button Grid.Row="0" Grid.Column="2" Command="{Binding BrowseZipFileCommand}" Width="100" Height="35" Margin="0,0,0,12" Style="{StaticResource ModernActionButtonStyle}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Path Data="{StaticResource Icon.Folder}" Fill="{StaticResource MainBackgroundBrush}" Width="12" Height="12" Stretch="Uniform" Margin="0,0,6,0"/>
+                                            <TextBlock Text="تصفح..."/>
+                                        </StackPanel>
+                                    </Button>
 
-                                <Label Grid.Row="1" Grid.Column="0" Content="مجلد wwwroot الأساسي:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Config.WwwRootBase}" Style="{StaticResource TextBoxStyle}"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="مجلد wwwroot الأساسي:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Config.WwwRootBase}" Height="35" Margin="0,0,0,12" Grid.ColumnSpan="2"/>
 
-                                <Label Grid.Row="2" Grid.Column="0" Content="اسم مجلد الشركة:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Config.CompanyFolderName}" Style="{StaticResource TextBoxStyle}"/>
-                            </Grid>
-                        </GroupBox>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="اسم مجلد الشركة:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,0"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Config.CompanyFolderName}" Height="35" Grid.ColumnSpan="2"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
 
-                        <GroupBox Header="إعدادات الموقع والتطبيق" Style="{StaticResource GroupBoxStyle}">
-                            <Grid Margin="5">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                        <Border Style="{StaticResource ModernCardStyle}">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                                    <Path Data="{StaticResource Icon.Settings}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                                    <TextBlock Text="إعدادات الموقع والتطبيق" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                                </StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                                <Label Grid.Row="0" Grid.Column="0" Content="اسم الموقع في IIS:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Config.IisSiteName}" Style="{StaticResource TextBoxStyle}"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="اسم الموقع في IIS:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Config.IisSiteName}" Height="35" Margin="0,0,0,12"/>
 
-                                <Label Grid.Row="1" Grid.Column="0" Content="اسم التطبيق:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Config.IisAppAlias}" Style="{StaticResource TextBoxStyle}"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="اسم التطبيق:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Config.IisAppAlias}" Height="35" Margin="0,0,0,12"/>
 
-                                <Label Grid.Row="2" Grid.Column="0" Content="اسم Application Pool:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Config.AppPoolName}" Style="{StaticResource TextBoxStyle}"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="اسم Application Pool:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Config.AppPoolName}" Height="35" Margin="0,0,0,12"/>
 
-                                <Label Grid.Row="3" Grid.Column="0" Content="مفتاح appSettings للمجلد:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Config.AppSettingsFolderKey}" Style="{StaticResource TextBoxStyle}"/>
-                            </Grid>
-                        </GroupBox>
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="مفتاح appSettings للمجلد:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,0"/>
+                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Config.AppSettingsFolderKey}" Height="35"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
 
-                        <GroupBox Header="تحديث web.config" Style="{StaticResource GroupBoxStyle}">
-                            <Grid Margin="5">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                        <Border Style="{StaticResource ModernCardStyle}">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                                    <Path Data="{StaticResource Icon.Settings}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                                    <TextBlock Text="تحديث web.config" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                                </StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                                <Label Grid.Row="0" Grid.Column="0" Content="اسم Connection String:" Style="{StaticResource LabelStyle}"/>
-                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Config.ConnectionStringName}" Style="{StaticResource TextBoxStyle}"/>
-                            </Grid>
-                        </GroupBox>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="اسم Connection String:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,0"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Config.ConnectionStringName}" Height="35"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
         </TabControl>
 
         <!-- شريط الحالة والأزرار -->
-        <Border Grid.Row="2" Background="LightGray" Padding="10" CornerRadius="4">
+        <Border Grid.Row="2" Style="{StaticResource ModernCardStyle}" Margin="0,16,0,0">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -284,18 +313,20 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="{Binding StatusText}"
-                          VerticalAlignment="Center"
-                          FontSize="14"
-                          FontWeight="Bold"/>
+                           VerticalAlignment="Center"
+                           FontSize="14"
+                           FontWeight="Medium"
+                           Foreground="{StaticResource PrimaryAccentBrush}"/>
 
-                <Button Grid.Column="1" Content="🚀 نشر التطبيق"
-                       Command="{Binding DeployCommand}"
-                       IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}"
-                       Style="{StaticResource ButtonStyle}"
-                       Background="Green"
-                       Foreground="White"
-                       FontSize="14"
-                       FontWeight="Bold"/>
+                <Button Grid.Column="1" Command="{Binding DeployCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}"
+                        Style="{StaticResource ModernActionButtonStyle}"
+                        Width="180" Height="45">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource Icon.Refresh}" Fill="{StaticResource MainBackgroundBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                        <TextBlock Text="🚀 نشر التطبيق" FontSize="16" FontWeight="Bold"/>
+                    </StackPanel>
+                </Button>
             </Grid>
         </Border>
     </Grid>

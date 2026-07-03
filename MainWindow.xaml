@@ -7,7 +7,9 @@
         Height="800" Width="1200"
         WindowStartupLocation="CenterScreen"
         FlowDirection="RightToLeft"
-        Icon="/Resources/icon.ico">
+        Icon="/Resources/icon.ico"
+        Background="{StaticResource MainBackgroundBrush}"
+        FontFamily="{StaticResource ModernFontFamily}">
 
     <Window.Resources>
         <!-- Converters -->
@@ -53,16 +55,16 @@
         </Grid.RowDefinitions>
 
         <!-- شريط العنوان -->
-        <Border Grid.Row="0" Background="#FF3F51B5" Padding="10" CornerRadius="4">
+        <Border Grid.Row="0" Background="{StaticResource PrimaryAccentBrush}" Padding="15" CornerRadius="8" Margin="0,0,0,10">
             <TextBlock Text="مدير قواعد البيانات وخدمات IIS" 
-                       FontSize="18" 
-                       FontWeight="Bold" 
-                       Foreground="White"
-                       HorizontalAlignment="Center"/>
+                       Style="{StaticResource ModernHeaderStyle}"
+                       HorizontalAlignment="Center"
+                       Margin="0"
+                       Foreground="{StaticResource MainBackgroundBrush}"/>
         </Border>
 
         <!-- تبويبات الوظائف الرئيسية -->
-        <TabControl Grid.Row="1" Margin="0,10">
+        <TabControl Grid.Row="1" Margin="0,10" BorderThickness="0" Background="Transparent" Padding="5">
             <!-- تبويب قواعد البيانات -->
             <TabItem Header="قواعد البيانات">
                 <Grid>
@@ -74,38 +76,93 @@
 
                     <!-- شريط أزرار قواعد البيانات -->
                     <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
-                        <Button Content="🔄 تحديث القائمة" Height="35" Width="130" Margin="5"
+                        <Button Height="35" Width="130" Margin="5"
                                 Command="{Binding LoadDatabasesCommand}" 
-                                ToolTip="تحديث قائمة قواعد البيانات"/>
+                                ToolTip="تحديث قائمة قواعد البيانات">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource Icon.Refresh}" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,5,0"/>
+                                <TextBlock Text="تحديث القائمة"/>
+                            </StackPanel>
+                        </Button>
 
-                        <Button Content="💾 حفظ الاختيار" Height="35" Width="130" Margin="5"
+                        <Button Height="35" Width="130" Margin="5"
                                 Command="{Binding SaveSelectionCommand}" 
-                                ToolTip="حفظ قواعد البيانات المحددة"/>
+                                ToolTip="حفظ قواعد البيانات المحددة">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource Icon.Save}" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,5,0"/>
+                                <TextBlock Text="حفظ الاختيار"/>
+                            </StackPanel>
+                        </Button>
 
-                        <Button Content="💽 نسخ احتياطي" Height="35" Width="130" Margin="5"
+                        <Button Height="35" Width="130" Margin="5"
                                 Command="{Binding RunBackupCommand}" 
-                                ToolTip="نسخ احتياطي للقواعد المحددة"/>
+                                ToolTip="نسخ احتياطي للقواعد المحددة">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource Icon.Database}" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,5,0"/>
+                                <TextBlock Text="نسخ احتياطي"/>
+                            </StackPanel>
+                        </Button>
 
-                        <Button Content="🔄 استعادة" Height="35" Width="130" Margin="5"
+                        <Button Height="35" Width="130" Margin="5"
                                 Command="{Binding RestoreCommand}" 
-                                ToolTip="استعادة قاعدة بيانات من نسخة احتياطية"/>
+                                ToolTip="استعادة قاعدة بيانات من نسخة احتياطية">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource Icon.Refresh}" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,5,0"/>
+                                <TextBlock Text="استعادة"/>
+                            </StackPanel>
+                        </Button>
 
-                        <Button Content="📝 تحديث SQL" Height="35" Width="130" Margin="5"
+                        <Button Height="35" Width="130" Margin="5"
                                 Command="{Binding ExecuteSqlForAllCommand}" 
-                                ToolTip="تنفيذ سكربت SQL على القواعد المحددة"/>
+                                ToolTip="تنفيذ سكربت SQL على القواعد المحددة">
+                             <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource Icon.Settings}" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,5,0"/>
+                                <TextBlock Text="تحديث SQL"/>
+                            </StackPanel>
+                        </Button>
 
 
-                        <!-- في شريط الأزرار، أضف هذا الزر -->
-                        <Button Content="📋 نسخ قاعدة" Height="35" Width="120" Margin="5,0"
-        Command="{Binding OpenCopyDatabaseCommand}" 
-        ToolTip="نسخ قاعدة بيانات مع تعديلات"/>
-                        <Button Content="☑️ تحديد الكل" Height="35" Width="120" Margin="5,0"
+                        <Button Height="35" Width="120" Margin="5,0"
+                                Command="{Binding OpenCopyDatabaseCommand}" 
+                                ToolTip="نسخ قاعدة بيانات مع تعديلات"
+                                Style="{StaticResource ModernActionButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource Icon.Save}" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,5,0"/>
+                                <TextBlock Text="نسخ قاعدة"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Height="35" Width="120" Margin="5,0"
                                 Command="{Binding SelectAllCommand}" 
-                                ToolTip="تحديد جميع قواعد البيانات"/>
+                                ToolTip="تحديد جميع قواعد البيانات"
+                                Style="{StaticResource ModernActionButtonStyle}">
+                             <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource Icon.Refresh}" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,5,0"/>
+                                <TextBlock Text="تحديد الكل"/>
+                            </StackPanel>
+                        </Button>
 
                         <Button Content="☐ إلغاء التحديد" Height="35" Width="120" Margin="5,0"
-                                Command="{Binding UnselectAllCommand}" 
+                                Command="{Binding UnselectAllCommand}"
                                 ToolTip="إلغاء تحديد جميع قواعد البيانات"/>
+
+                        <!-- صيانة XML لكل القواعد -->
+                        <Button Content="XML للكل ▾" Height="35" Width="120" Margin="5,0"
+                                Click="DatabaseActions_Click"
+                                ToolTip="تطبيق إجراءات صيانة XML على كل قواعد البيانات"
+                                Style="{StaticResource ModernActionButtonStyle}"
+                                Background="{StaticResource SecondaryAccentBrush}">
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="إيقاف XML للصيانة (الكل)"
+                                              Command="{Binding PlacementTarget.DataContext.EnableMaintenanceAllCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                    <MenuItem Header="استرجاع XML (الكل)"
+                                              Command="{Binding PlacementTarget.DataContext.DisableMaintenanceAllCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                    <Separator/>
+                                    <MenuItem Header="تحديث حالة XML (الكل)"
+                                              Command="{Binding PlacementTarget.DataContext.RefreshMaintenanceAllCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
 
                     </StackPanel>
 
@@ -127,30 +184,70 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTextColumn Header="اسم قاعدة البيانات" Binding="{Binding DatabaseName}" Width="*" />
-                            <DataGridTextColumn Header="الحالة" Binding="{Binding Status}" Width="150" />
+                            <DataGridTextColumn Header="الحالة" Binding="{Binding Status}" Width="120" />
+                            <DataGridTextColumn Header="حالة XML" Binding="{Binding MaintenanceStatusText}" Width="150" />
+                            <DataGridTemplateColumn Header="إجراءات" Width="110">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="إجراءات ▾" Padding="8,4"
+                                                Style="{StaticResource ModernActionButtonStyle}"
+                                                Click="DatabaseActions_Click"
+                                                HorizontalAlignment="Center">
+                                            <Button.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="إيقاف XML للصيانة"
+                                                              Command="{Binding PlacementTarget.DataContext.EnableMaintenanceCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                    <MenuItem Header="استرجاع XML"
+                                                              Command="{Binding PlacementTarget.DataContext.DisableMaintenanceCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                    <Separator/>
+                                                    <MenuItem Header="تحديث الحالة"
+                                                              Command="{Binding PlacementTarget.DataContext.RefreshMaintenanceCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                </ContextMenu>
+                                            </Button.ContextMenu>
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
 
                     <!-- منطقة العمليات على القواعد الجديدة -->
-                    <GroupBox Grid.Row="2" Header="عمليات على القواعد الجديدة" Margin="0,10">
+                    <Border Grid.Row="2" Style="{StaticResource ModernCardStyle}" Margin="0,10">
                         <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="عمليات على القواعد الجديدة" Style="{StaticResource ModernHeaderStyle}" FontSize="14" Margin="0,0,0,10"/>
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                            <TextBox Grid.Column="0" Margin="5" 
-                                     Text="{Binding NewDbOperations}" 
-                                     AcceptsReturn="True"
-                                     TextWrapping="Wrap"
-                                     VerticalScrollBarVisibility="Auto"
-                                     Height="80"/>
+                                <TextBox Grid.Column="0" Margin="5" 
+                                         Text="{Binding NewDbOperations}" 
+                                         AcceptsReturn="True"
+                                         TextWrapping="Wrap"
+                                         VerticalScrollBarVisibility="Auto"
+                                         Height="80"
+                                         Background="Transparent"
+                                         Foreground="{StaticResource TextMainBrush}"
+                                         BorderBrush="{StaticResource SurfaceBrush}"
+                                         CaretBrush="{StaticResource PrimaryAccentBrush}"/>
 
-                            <Button Grid.Column="1" Content="تنفيذ" Height="35" Width="80" Margin="5"
-                                    Command="{Binding RunOperationsOnNewDbCommand}"
-                                    ToolTip="تنفيذ عمليات SQL على القواعد الجديدة"/>
+                                <Button Grid.Column="1" Height="35" Width="100" Margin="5"
+                                        Command="{Binding RunOperationsOnNewDbCommand}"
+                                        ToolTip="تنفيذ عمليات SQL على القواعد الجديدة"
+                                        Style="{StaticResource ModernActionButtonStyle}">
+                                     <StackPanel Orientation="Horizontal">
+                                        <Path Data="{StaticResource Icon.Refresh}" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,5,0"/>
+                                        <TextBlock Text="تنفيذ"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
                         </Grid>
-                    </GroupBox>
+                    </Border>
                 </Grid>
             </TabItem>
 
@@ -168,25 +265,93 @@
                     </Grid.RowDefinitions>
 
                     <!-- نشر التطبيق الآلي -->
-                    <GroupBox Grid.Row="0" Header="نشر التطبيق الآلي" Margin="0,5">
-                        <Button Content="🚀 فتح نافذة النشر الآلي" Height="40" Margin="10"
+                    <Border Grid.Row="0" Style="{StaticResource ModernCardStyle}" Margin="0,5">
+                          <Button Height="44" Margin="10"
                                 Command="{Binding OpenAutoDeployCommand}"
                                 ToolTip="فتح نافذة النشر الآلي للتطبيقات على IIS"
-                                Background="#FF4CAF50" Foreground="White" FontSize="14" FontWeight="Bold"/>
-                    </GroupBox>
+                                Style="{StaticResource ModernActionButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource Icon.Settings}" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                                <TextBlock Text="فتح نافذة النشر الآلي" FontSize="14"/>
+                            </StackPanel>
+                        </Button>
+                    </Border>
 
                     <!-- المهام اليومية المجدولة -->
-                    <GroupBox Grid.Row="1" Header="📅 المهام اليومية المجدولة" Margin="0,5">
-                        <Button Content="📋 إدارة المهام اليومية" Height="40" Margin="10"
+                    <Border Grid.Row="1" Style="{StaticResource ModernCardStyle}" Margin="0,5">
+                          <Button Height="44" Margin="10"
                                 Command="{Binding OpenDailyTasksCommand}"
                                 ToolTip="إدارة المهام المجدولة اليومية على قواعد البيانات"
-                                Background="#FF2196F3" Foreground="White" FontSize="14" FontWeight="Bold"/>
-                    </GroupBox>
+                                Style="{StaticResource ModernActionButtonStyle}"
+                                Background="{StaticResource SecondaryAccentBrush}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource Icon.Refresh}" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                                <TextBlock Text="إدارة المهام اليومية" FontSize="14"/>
+                            </StackPanel>
+                        </Button>
+                    </Border>
 
-                  
+                    <!-- صيانة وتسريع IIS -->
+                    <Border Grid.Row="6" Style="{StaticResource ModernCardStyle}" Margin="0,5"
+                            DataContext="{Binding IisMaintenance}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                    <!-- إنشاء برنامج فرعي -->
-                 
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                                <Path Data="{StaticResource Icon.Server}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                                <TextBlock Text="صيانة وتسريع IIS" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                            </StackPanel>
+
+                            <!-- تحذير الصلاحيات -->
+                            <Border Grid.Row="1" Background="{StaticResource ErrorBrush}" CornerRadius="8" Padding="12" Margin="0,0,0,10"
+                                    Visibility="{Binding IsNotAdministrator, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <TextBlock Text="⚠️ عمليات IIS تتطلب تشغيل البرنامج كمسؤول (Administrator)."
+                                           Foreground="White" TextWrapping="Wrap" FontWeight="Bold"/>
+                            </Border>
+
+                            <!-- أزرار العمليات -->
+                            <WrapPanel Grid.Row="2" Margin="0,0,0,10">
+                                <Button Content="🔄 تحديث القائمة" Command="{Binding RefreshPoolsCommand}"
+                                        Style="{StaticResource ModernActionButtonStyle}" Height="36" Margin="4" Padding="12,0"/>
+                                <Button Content="⚡ تحسين المحدد" Command="{Binding OptimizeSelectedPoolCommand}"
+                                        Style="{StaticResource ModernActionButtonStyle}" Height="36" Margin="4" Padding="12,0"/>
+                                <Button Content="⚡ تحسين الكل" Command="{Binding OptimizeAllPoolsCommand}"
+                                        Style="{StaticResource ModernActionButtonStyle}" Height="36" Margin="4" Padding="12,0"/>
+                                <Button Content="♻️ إعادة تدوير Pool" Command="{Binding RecyclePoolCommand}"
+                                        Background="{StaticResource SecondaryAccentBrush}" Foreground="{StaticResource TextMainBrush}"
+                                        BorderThickness="0" Height="36" Margin="4" Padding="12,0"/>
+                                <Button Content="🔁 إعادة تشغيل IIS كاملة" Command="{Binding RestartIisCommand}"
+                                        Background="{StaticResource ErrorBrush}" Foreground="White"
+                                        BorderThickness="0" Height="36" Margin="4" Padding="12,0"/>
+                            </WrapPanel>
+
+                            <!-- جدول الـ Application Pools -->
+                            <DataGrid Grid.Row="3" ItemsSource="{Binding AppPools}"
+                                      SelectedItem="{Binding SelectedAppPool}"
+                                      AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                                      HeadersVisibility="Column" FontSize="13" MinHeight="160">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="الاسم" Binding="{Binding Name}" Width="*"/>
+                                    <DataGridTextColumn Header="الحالة" Binding="{Binding State}" Width="90"/>
+                                    <DataGridTextColumn Header="StartMode" Binding="{Binding StartMode}" Width="120"/>
+                                    <DataGridTextColumn Header="خمول (د)" Binding="{Binding IdleTimeoutMinutes}" Width="80"/>
+                                    <DataGridTextColumn Header="تدوير دوري (د)" Binding="{Binding PeriodicRestartMinutes}" Width="110"/>
+                                    <DataGridTextColumn Header="الطابور" Binding="{Binding QueueLength}" Width="80"/>
+                                    <DataGridCheckBoxColumn Header="مُحسّن؟" Binding="{Binding IsOptimized}" Width="80"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <!-- حالة العملية -->
+                            <TextBlock Grid.Row="4" Text="{Binding StatusText}" Margin="4,10,4,0"
+                                       TextWrapping="Wrap" Foreground="{StaticResource PrimaryAccentBrush}" FontSize="13"/>
+                        </Grid>
+                    </Border>
                 </Grid>
             </TabItem>
 
@@ -203,21 +368,36 @@
 
                     <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
 
-                        <Button Content="⚙ الإعدادات" Height="35" Width="100" Margin="5,0"
-    Command="{Binding OpenSettingsCommand}" 
-    ToolTip="فتح نافذة الإعدادات" 
-    />
-                        <Button Content="⏰ النسخ التلقائي" Height="35" Width="130" Margin="5"
-        Command="{Binding OpenAutoBackupCommand}" 
-        ToolTip="إدارة النسخ الاحتياطي التلقائي"
-        IsEnabled="{Binding !IsBusy}"/>
+                        <Button Height="35" Width="100" Margin="5,0"
+                                Command="{Binding OpenSettingsCommand}" 
+                                ToolTip="فتح نافذة الإعدادات">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource Icon.Settings}" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,5,0"/>
+                                <TextBlock Text="الإعدادات"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Height="35" Width="130" Margin="5"
+                                Command="{Binding OpenAutoBackupCommand}" 
+                                ToolTip="إدارة النسخ الاحتياطي التلقائي"
+                                IsEnabled="{Binding !IsBusy}"
+                                Style="{StaticResource ModernActionButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource Icon.Settings}" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,5,0"/>
+                                <TextBlock Text="النسخ التلقائي"/>
+                            </StackPanel>
+                        </Button>
         
-                        <Button Content="📅 جدولة النسخ الاحتياطي" Height="35" Width="150" Margin="5"
-        Command="{Binding OpenScheduledBackupCommand}" 
-        ToolTip="إعداد جدولة النسخ الاحتياطي التلقائي"
-        Background="MediumSeaGreen"
-        Foreground="White"
-        IsEnabled="{Binding !IsBusy}"/>
+                        <Button Height="35" Width="160" Margin="5"
+                                Command="{Binding OpenScheduledBackupCommand}" 
+                                ToolTip="إعداد جدولة النسخ الاحتياطي التلقائي"
+                                IsEnabled="{Binding !IsBusy}"
+                                Style="{StaticResource ModernActionButtonStyle}"
+                                Background="{StaticResource SecondaryAccentBrush}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource Icon.Refresh}" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,5,0"/>
+                                <TextBlock Text="جدولة النسخ الاحتياطي"/>
+                            </StackPanel>
+                        </Button>
 
                     </StackPanel>
 
@@ -545,16 +725,28 @@
        
         </TabControl>
 
-        <!-- شريط الحالة السفلي -->
-        <StatusBar Grid.Row="2" Margin="0,5,0,0">
-            <StatusBarItem>
-                <TextBlock Text="{Binding StatusText}" FontWeight="Bold"/>
-            </StatusBarItem>
-            <StatusBarItem HorizontalAlignment="Right">
-                <ProgressBar Width="150" Height="18"
-                             IsIndeterminate="True" 
-                            />
-            </StatusBarItem>
-        </StatusBar>
+        <Border Grid.Row="2" Style="{StaticResource ModernCardStyle}" Margin="10,5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" Grid.Column="0">
+                    <TextBlock Text="إجمالي النسخ الاحتياطية:" Margin="5" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}"/>
+                    <TextBlock Text="{Binding TotalBackups}" Foreground="{StaticResource PrimaryAccentBrush}" FontWeight="Bold" Margin="5" VerticalAlignment="Center"/>
+                    <TextBlock Text="الناجحة:" Margin="20,5,5,5" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}"/>
+                    <TextBlock Text="{Binding SuccessfulBackups}" Foreground="{StaticResource PrimaryAccentBrush}" FontWeight="Bold" Margin="5" VerticalAlignment="Center"/>
+                    <TextBlock Text="الفاشلة:" Margin="20,5,5,5" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}"/>
+                    <TextBlock Text="{Binding FailedBackups}" Foreground="{StaticResource ErrorBrush}" FontWeight="Bold" Margin="5" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <TextBlock Grid.Column="1" Text="{Binding CurrentOperationStatus}" 
+                           Foreground="{StaticResource PrimaryAccentBrush}" 
+                           FontWeight="Bold" 
+                           Margin="10" 
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

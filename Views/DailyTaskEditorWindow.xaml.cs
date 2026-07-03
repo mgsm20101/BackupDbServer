@@ -19,6 +19,7 @@ namespace BackupDbServer.Views
             InitializeComponent();
             _task = task;
             LoadTaskTypes();
+            LoadScheduleOptions();
             LoadTaskData();
         }
 
@@ -31,6 +32,19 @@ namespace BackupDbServer.Views
             TaskTypeComboBox.Items.Add(new ComboBoxItem { Content = "تحديث الإحصائيات", Tag = TaskType.UpdateStatistics });
             TaskTypeComboBox.Items.Add(new ComboBoxItem { Content = "إعادة بناء الفهارس", Tag = TaskType.RebuildIndexes });
             TaskTypeComboBox.Items.Add(new ComboBoxItem { Content = "ضغط القاعدة", Tag = TaskType.ShrinkDatabase });
+        }
+
+        private void LoadScheduleOptions()
+        {
+            ScheduleModeComboBox.Items.Add(new ComboBoxItem { Content = "يومياً في وقت محدد", Tag = ScheduleMode.Daily });
+            ScheduleModeComboBox.Items.Add(new ComboBoxItem { Content = "تكرار كل فترة", Tag = ScheduleMode.Interval });
+
+            IntervalPresetComboBox.Items.Add(new ComboBoxItem { Content = "كل 30 دقيقة", Tag = 30 });
+            IntervalPresetComboBox.Items.Add(new ComboBoxItem { Content = "كل ساعة", Tag = 60 });
+            IntervalPresetComboBox.Items.Add(new ComboBoxItem { Content = "كل ساعتين", Tag = 120 });
+            IntervalPresetComboBox.Items.Add(new ComboBoxItem { Content = "كل 6 ساعات", Tag = 360 });
+            IntervalPresetComboBox.Items.Add(new ComboBoxItem { Content = "كل 12 ساعة", Tag = 720 });
+            IntervalPresetComboBox.Items.Add(new ComboBoxItem { Content = "مخصص", Tag = 0 });
         }
 
         private void LoadTaskData()
@@ -49,7 +63,7 @@ namespace BackupDbServer.Views
             
             HourTextBox.Text = _task.ExecutionTime.Hour.ToString("00");
             MinuteTextBox.Text = _task.ExecutionTime.Minute.ToString("00");
-            
+
             SqlScriptTextBox.Text = _task.SqlScript;
             StoredProcedureTextBox.Text = _task.StoredProcedureName;
 
@@ -63,12 +77,89 @@ namespace BackupDbServer.Views
                 }
             }
 
+            // اختيار نمط الجدولة
+            foreach (ComboBoxItem item in ScheduleModeComboBox.Items)
+            {
+                if ((ScheduleMode)item.Tag == _task.Mode)
+                {
+                    ScheduleModeComboBox.SelectedItem = item;
+                    break;
+                }
+            }
+
+            // مطابقة الفترة مع أحد الخيارات الجاهزة أو تفعيل "مخصص"
+            ComboBoxItem? matchedPreset = null;
+            foreach (ComboBoxItem item in IntervalPresetComboBox.Items)
+            {
+                if ((int)item.Tag == _task.IntervalMinutes)
+                {
+                    matchedPreset = item;
+                    break;
+                }
+            }
+
+            if (matchedPreset != null)
+            {
+                IntervalPresetComboBox.SelectedItem = matchedPreset;
+            }
+            else
+            {
+                // قيمة مخصصة: اختر خيار "مخصص" (Tag=0) واكتب القيمة
+                foreach (ComboBoxItem item in IntervalPresetComboBox.Items)
+                {
+                    if ((int)item.Tag == 0)
+                    {
+                        IntervalPresetComboBox.SelectedItem = item;
+                        break;
+                    }
+                }
+                CustomMinutesTextBox.Text = _task.IntervalMinutes.ToString();
+            }
+
             UpdateFieldsVisibility();
+            UpdateScheduleModeVisibility();
         }
 
         private void TaskTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UpdateFieldsVisibility();
+        }
+
+        private void ScheduleModeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateScheduleModeVisibility();
+        }
+
+        private void IntervalPresetComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateCustomMinutesVisibility();
+        }
+
+        private void UpdateScheduleModeVisibility()
+        {
+            // العناصر قد تكون null أثناء التهيئة قبل اكتمال بناء الواجهة
+            if (DailyPanel == null || IntervalPanel == null)
+                return;
+
+            var isInterval = ScheduleModeComboBox.SelectedItem is ComboBoxItem selected
+                             && (ScheduleMode)selected.Tag == ScheduleMode.Interval;
+
+            DailyPanel.Visibility = isInterval ? Visibility.Collapsed : Visibility.Visible;
+            IntervalPanel.Visibility = isInterval ? Visibility.Visible : Visibility.Collapsed;
+
+            UpdateCustomMinutesVisibility();
+        }
+
+        private void UpdateCustomMinutesVisibility()
+        {
+            if (CustomMinutesTextBox == null || CustomMinutesLabel == null)
+                return;
+
+            var isCustom = IntervalPresetComboBox.SelectedItem is ComboBoxItem selected
+                           && (int)selected.Tag == 0;
+
+            CustomMinutesTextBox.Visibility = isCustom ? Visibility.Visible : Visibility.Collapsed;
+            CustomMinutesLabel.Visibility = isCustom ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void LoadDatabases()
@@ -198,23 +289,59 @@ namespace BackupDbServer.Views
                     return;
                 }
 
-                if (!int.TryParse(HourTextBox.Text, out int hour) || hour < 0 || hour > 23)
-                {
-                    MessageBox.Show("يرجى إدخال ساعة صحيحة (0-23)", "خطأ", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
+                var mode = ScheduleModeComboBox.SelectedItem is ComboBoxItem modeItem
+                    ? (ScheduleMode)modeItem.Tag
+                    : ScheduleMode.Daily;
 
-                if (!int.TryParse(MinuteTextBox.Text, out int minute) || minute < 0 || minute > 59)
+                int hour = _task.ExecutionTime.Hour;
+                int minute = _task.ExecutionTime.Minute;
+                int intervalMinutes = _task.IntervalMinutes;
+
+                if (mode == ScheduleMode.Daily)
                 {
-                    MessageBox.Show("يرجى إدخال دقيقة صحيحة (0-59)", "خطأ", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
+                    if (!int.TryParse(HourTextBox.Text, out hour) || hour < 0 || hour > 23)
+                    {
+                        MessageBox.Show("يرجى إدخال ساعة صحيحة (0-23)", "خطأ", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    if (!int.TryParse(MinuteTextBox.Text, out minute) || minute < 0 || minute > 59)
+                    {
+                        MessageBox.Show("يرجى إدخال دقيقة صحيحة (0-59)", "خطأ", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+                }
+                else // ScheduleMode.Interval
+                {
+                    if (IntervalPresetComboBox.SelectedItem is not ComboBoxItem presetItem)
+                    {
+                        MessageBox.Show("يرجى اختيار الفترة الزمنية للتكرار", "خطأ", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    var presetMinutes = (int)presetItem.Tag;
+                    if (presetMinutes == 0)
+                    {
+                        // قيمة مخصصة
+                        if (!int.TryParse(CustomMinutesTextBox.Text, out intervalMinutes) || intervalMinutes < 1)
+                        {
+                            MessageBox.Show("يرجى إدخال عدد دقائق صحيح (1 أو أكثر)", "خطأ", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        intervalMinutes = presetMinutes;
+                    }
                 }
 
                 // حفظ البيانات
                 _task.TaskName = TaskNameTextBox.Text;
                 _task.IsEnabled = IsEnabledCheckBox.IsChecked == true;
                 _task.DatabaseName = DatabaseNameComboBox.Text;
+                _task.Mode = mode;
                 _task.ExecutionTime = new TimeOnly(hour, minute);
+                _task.IntervalMinutes = intervalMinutes;
                 _task.SqlScript = SqlScriptTextBox.Text;
                 _task.StoredProcedureName = StoredProcedureTextBox.Text;
 

@@ -39,3 +39,7 @@ DriveCredentials/
 .claude/
 .specify/specs/
 .specify/memory/tasks.md
+
+# Client release build output (large binaries)
+publish/
+*.pubxml.user
