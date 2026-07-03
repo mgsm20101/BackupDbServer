@@ -42,10 +42,6 @@
         </Style>
     </Window.Resources>
 
-    <Window.DataContext>
-        <local:MainViewModel/>
-    </Window.DataContext>
-
 
     <Grid Margin="10">
         <Grid.RowDefinitions>

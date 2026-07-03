@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using BackupDbServer.Helpers;
+using BackupDbServer.ViewModels;
 using System.ComponentModel;
 
 namespace BackupDbServer.Views
@@ -16,11 +17,12 @@ namespace BackupDbServer.Views
         private DispatcherTimer? _idleTimer;
         private static readonly TimeSpan IdleTimeout = TimeSpan.FromMinutes(10);
 
-        public MainWindow()
+        public MainWindow(MainViewModel viewModel)
         {
             try
             {
                 InitializeComponent();
+                DataContext = viewModel;
                 _logger = new FileLogger();
                 InitializeTrayIcon();
                 _logger.LogInformation("تم تهيئة النافذة الرئيسية بنجاح");

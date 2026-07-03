@@ -1,7 +1,11 @@
-﻿using System.Configuration;
+using System.Configuration;
 using System.Data;
 using System.Windows;
+using BackupDbServer.Core.Infrastructure;
 using BackupDbServer.Helpers;
+using BackupDbServer.Views;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace BackupDbServer
 {
@@ -11,29 +15,36 @@ namespace BackupDbServer
     public partial class App : System.Windows.Application
     {
         private HealthMonitor? _healthMonitor;
+        private IHost? _host;
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            // تهيئة ServiceContainer - نقطة واحدة لإدارة جميع الخدمات
-            ServiceContainer.Initialize();
-            
+            // بناء حاوية DI (Generic Host) وتسجيل كل الخدمات
+            _host = new HostBuilder()
+                .ConfigureServices(services => services.AddApplicationServices())
+                .Build();
+            _host.Start();
+
+            // تهيئة ServiceContainer - نقطة توافق تُحلّ الخدمات من حاوية DI
+            ServiceContainer.Initialize(_host.Services);
+
             // الحصول على Logger من ServiceContainer
             var logger = ServiceContainer.Logger;
-            
+
             // تفعيل نظام الحماية من الأخطاء
             CrashProtectionManager.Initialize(logger);
-            
+
             // تفعيل نظام مراقبة الصحة
             _healthMonitor = new HealthMonitor(logger);
-            
+
             // التحقق من إغلاق مفاجئ سابق
             if (CrashProtectionManager.CheckForPreviousCrash())
             {
                 logger.LogWarning("تم اكتشاف إغلاق مفاجئ في الجلسة السابقة");
-                System.Windows.MessageBox.Show("تم اكتشاف إغلاق مفاجئ في الجلسة السابقة.\nتم حفظ تفاصيل الحالة في ملفات السجل.", 
+                System.Windows.MessageBox.Show("تم اكتشاف إغلاق مفاجئ في الجلسة السابقة.\nتم حفظ تفاصيل الحالة في ملفات السجل.",
                               "استرداد من إغلاق مفاجئ", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
             }
-            
+
             // التحقق من ملف صحة سابق
             if (_healthMonitor.CheckForPreviousHealthFile())
             {
@@ -82,6 +93,12 @@ namespace BackupDbServer
             }
 
             logger.LogInformation("بدء تشغيل التطبيق مع نظام الحماية المفعل وServiceContainer");
+
+            // إنشاء وعرض النافذة الرئيسية عبر حاوية DI بدل StartupUri
+            var mainWindow = _host.Services.GetRequiredService<MainWindow>();
+            MainWindow = mainWindow;
+            mainWindow.Show();
+
             base.OnStartup(e);
         }
 
@@ -91,19 +108,19 @@ namespace BackupDbServer
             {
                 var logger = ServiceContainer.Logger;
                 logger.LogInformation($"إغلاق التطبيق بدء - كود الخروج: {e.ApplicationExitCode}");
-                
+
                 // تنظيف نظام مراقبة الصحة
                 _healthMonitor?.Dispose();
-                
+
                 // تنظيف نظام الحماية
                 CrashProtectionManager.Cleanup();
-                
+
                 // تنظيف موارد SingleInstanceManager
                 SingleInstanceManager.Cleanup();
-                
+
                 // إيقاف جميع الخدمات عبر ServiceContainer
                 ServiceContainer.Shutdown();
-                
+
                 logger.LogInformation("تم إغلاق التطبيق بنجاح");
             }
             catch (Exception ex)
@@ -118,9 +135,9 @@ namespace BackupDbServer
             }
             finally
             {
+                _host?.Dispose();
                 base.OnExit(e);
             }
         }
     }
-
 }

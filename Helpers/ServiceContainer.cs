@@ -1,238 +1,47 @@
-using BackupDbServer.Models;
-using BackupDbServer.Services;
-using BackupDbServer.Service; // إضافة namespace للـ DailyTaskService
 using System;
 using System.IO;
 using System.Text.Json;
+using BackupDbServer.Models;
+using BackupDbServer.Service;
+using BackupDbServer.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BackupDbServer.Helpers
 {
     /// <summary>
-    /// حاوية الخدمات المركزية - نمط Singleton
-    /// تدير دورة حياة جميع الخدمات المشتركة في التطبيق
+    /// نقطة وصول موحّدة للخدمات المشتركة. تُحلّ الخدمات الآن من حاوية DI
+    /// (انظر Core/Infrastructure/ServiceCollectionExtensions.cs) بدل الإنشاء اليدوي.
+    /// تُبقي هذه الواجهة الثابتة متوافقة مع كل الاستدعاءات الحالية (ServiceContainer.X)
+    /// أثناء هجرة تدريجية لباقي الكود نحو حقن التبعيات المباشر.
     /// </summary>
     public static class ServiceContainer
     {
-        private static readonly object _lock = new object();
-        
-        // الخدمات الأساسية
-        private static ILogger? _logger;
-        private static BackupRestoreService? _backupService;
-        private static IAutoBackupService? _autoBackupService;
-        private static IScheduledBackupService? _scheduledBackupService;
-        private static DailyTaskService? _dailyTaskService;
-        private static GoogleDriveServiceFixed? _googleDriveService;
-        private static BackupRetentionPolicy? _retentionPolicy;
-        private static AppLockManager? _appLock;
-        private static XmlMaintenanceService? _xmlMaintenanceService;
+        private static IServiceProvider? _provider;
+        private static bool _isInitialized;
 
-        // حالة التهيئة
-        private static bool _isInitialized = false;
+        public static ILogger Logger => Resolve<ILogger>();
+        public static BackupRestoreService BackupService => Resolve<BackupRestoreService>();
+        public static GoogleDriveServiceFixed GoogleDriveService => Resolve<GoogleDriveServiceFixed>();
+        public static IAutoBackupService AutoBackupService => Resolve<IAutoBackupService>();
+        public static IScheduledBackupService ScheduledBackupService => Resolve<IScheduledBackupService>();
+        public static DailyTaskService DailyTaskService => Resolve<DailyTaskService>();
+        public static BackupRetentionPolicy RetentionPolicy => Resolve<BackupRetentionPolicy>();
+        public static AppLockManager AppLock => Resolve<AppLockManager>();
+        public static XmlMaintenanceService XmlMaintenance => Resolve<XmlMaintenanceService>();
 
-        /// <summary>
-        /// خدمة التسجيل (Logger) - Singleton
-        /// </summary>
-        public static ILogger Logger
+        public static bool IsInitialized => _isInitialized;
+
+        private static T Resolve<T>() where T : notnull
         {
-            get
-            {
-                if (_logger == null)
-                {
-                    lock (_lock)
-                    {
-                        _logger ??= new FileLogger();
-                    }
-                }
-                return _logger;
-            }
+            if (_provider == null)
+                throw new InvalidOperationException("ServiceContainer.Initialize(provider) لم يُستدعَ بعد.");
+            return _provider.GetRequiredService<T>();
         }
 
         /// <summary>
-        /// خدمة النسخ الاحتياطي والاستعادة - Singleton
+        /// تهيئة الحاوية بمزوّد الخدمات الناتج عن الـ Host (يُستدعى مرة واحدة من App.xaml.cs).
         /// </summary>
-        public static BackupRestoreService BackupService
-        {
-            get
-            {
-                if (_backupService == null)
-                {
-                    lock (_lock)
-                    {
-                        if (_backupService == null)
-                        {
-                            _backupService = new BackupRestoreService();
-                            Logger.LogInformation("✅ تم إنشاء BackupRestoreService");
-                        }
-                    }
-                }
-                return _backupService;
-            }
-        }
-
-        /// <summary>
-        /// خدمة Google Drive - Singleton
-        /// </summary>
-        public static GoogleDriveServiceFixed GoogleDriveService
-        {
-            get
-            {
-                if (_googleDriveService == null)
-                {
-                    lock (_lock)
-                    {
-                        if (_googleDriveService == null)
-                        {
-                            var credentialsPath = GetGoogleDriveCredentialsPath();
-                            _googleDriveService = new GoogleDriveServiceFixed(Logger, credentialsPath);
-                            Logger.LogInformation($"✅ تم إنشاء GoogleDriveService - Credentials: {credentialsPath}");
-                        }
-                    }
-                }
-                return _googleDriveService;
-            }
-        }
-
-        /// <summary>
-        /// خدمة النسخ الاحتياطي التلقائي - Singleton
-        /// </summary>
-        public static IAutoBackupService AutoBackupService
-        {
-            get
-            {
-                if (_autoBackupService == null)
-                {
-                    lock (_lock)
-                    {
-                        if (_autoBackupService == null)
-                        {
-                            _autoBackupService = new AutoBackupService(
-                                Logger,
-                                BackupService,
-                                GoogleDriveService);
-                            Logger.LogInformation("✅ تم إنشاء AutoBackupService");
-                        }
-                    }
-                }
-                return _autoBackupService;
-            }
-        }
-
-        /// <summary>
-        /// خدمة النسخ الاحتياطي المجدول - Singleton
-        /// </summary>
-        public static IScheduledBackupService ScheduledBackupService
-        {
-            get
-            {
-                if (_scheduledBackupService == null)
-                {
-                    lock (_lock)
-                    {
-                        if (_scheduledBackupService == null)
-                        {
-                            _scheduledBackupService = new ScheduledBackupService(
-                                BackupService,
-                                Logger);
-                            Logger.LogInformation("✅ تم إنشاء ScheduledBackupService");
-                        }
-                    }
-                }
-                return _scheduledBackupService;
-            }
-        }
-
-        /// <summary>
-        /// خدمة المهام اليومية - Singleton
-        /// </summary>
-        public static DailyTaskService DailyTaskService
-        {
-            get
-            {
-                if (_dailyTaskService == null)
-                {
-                    lock (_lock)
-                    {
-                        if (_dailyTaskService == null)
-                        {
-                            _dailyTaskService = new DailyTaskService(Logger);
-                            Logger.LogInformation("✅ تم إنشاء DailyTaskService");
-                        }
-                    }
-                }
-                return _dailyTaskService;
-            }
-        }
-
-        /// <summary>
-        /// خدمة سياسة الاحتفاظ بالنسخ الاحتياطية - Singleton
-        /// </summary>
-        public static BackupRetentionPolicy RetentionPolicy
-        {
-            get
-            {
-                if (_retentionPolicy == null)
-                {
-                    lock (_lock)
-                    {
-                        if (_retentionPolicy == null)
-                        {
-                            var settings = new BackupRetentionPolicy.RetentionSettings
-                            {
-                                DailyRetentionDays = 7,      // آخر 7 أيام: جميع النسخ اليومية
-                                WeeklyRetentionWeeks = 52,   // 52 أسبوع: الاحتفاظ بنسخة كل جمعة لمدة سنة كاملة
-                                MonthlyRetentionMonths = 12, // 12 شهر: احتياطي (آخر جمعة بالشهر) لما بعد السنة
-                                DeleteOlderThanYear = false, // الاحتفاظ بالنسخ القديمة (آخر جمعة بالربع)
-                                WeeklyBackupDay = DayOfWeek.Friday
-                            };
-                            _retentionPolicy = new BackupRetentionPolicy(Logger, settings);
-                            Logger.LogInformation("✅ تم إنشاء BackupRetentionPolicy");
-                        }
-                    }
-                }
-                return _retentionPolicy;
-            }
-        }
-
-        /// <summary>
-        /// مدير قفل التطبيق بكلمة سر - Singleton
-        /// </summary>
-        public static AppLockManager AppLock
-        {
-            get
-            {
-                if (_appLock == null)
-                {
-                    lock (_lock)
-                    {
-                        _appLock ??= new AppLockManager();
-                    }
-                }
-                return _appLock;
-            }
-        }
-
-        /// <summary>
-        /// خدمة صيانة XmlPath (إيقاف/استرجاع عمل XML للعميل) - Singleton
-        /// </summary>
-        public static XmlMaintenanceService XmlMaintenance
-        {
-            get
-            {
-                if (_xmlMaintenanceService == null)
-                {
-                    lock (_lock)
-                    {
-                        _xmlMaintenanceService ??= new XmlMaintenanceService(Logger);
-                    }
-                }
-                return _xmlMaintenanceService;
-            }
-        }
-
-        /// <summary>
-        /// تهيئة جميع الخدمات الأساسية عند بدء التطبيق
-        /// </summary>
-        public static void Initialize()
+        public static void Initialize(IServiceProvider provider)
         {
             if (_isInitialized)
             {
@@ -240,26 +49,23 @@ namespace BackupDbServer.Helpers
                 return;
             }
 
-            lock (_lock)
-            {
-                if (_isInitialized) return;
+            _provider = provider;
 
-                Logger.LogInformation("🚀 بدء تهيئة ServiceContainer...");
+            Logger.LogInformation("🚀 بدء تهيئة ServiceContainer...");
 
-                // التأكد من إنشاء الخدمات الأساسية
-                _ = Logger;
-                _ = BackupService;
-                _ = ScheduledBackupService;
-                
-                // بدء خدمة المهام اليومية
-                DailyTaskService.Start();
-                
-                // بدء خدمة النسخ التلقائي إذا كانت مفعلة
-                _ = StartAutoBackupIfEnabledAsync();
+            // التأكد من إنشاء الخدمات الأساسية (نفس ترتيب الإنشاء القديم)
+            _ = Logger;
+            _ = BackupService;
+            _ = ScheduledBackupService;
 
-                _isInitialized = true;
-                Logger.LogInformation("✅ تم تهيئة ServiceContainer بنجاح");
-            }
+            // بدء خدمة المهام اليومية
+            DailyTaskService.Start();
+
+            // بدء خدمة النسخ التلقائي إذا كانت مفعلة
+            _ = StartAutoBackupIfEnabledAsync();
+
+            _isInitialized = true;
+            Logger.LogInformation("✅ تم تهيئة ServiceContainer بنجاح");
         }
 
         /// <summary>
@@ -267,90 +73,35 @@ namespace BackupDbServer.Helpers
         /// </summary>
         public static void Shutdown()
         {
-            lock (_lock)
+            if (_provider == null) return;
+
+            Logger.LogInformation("🛑 بدء إيقاف ServiceContainer...");
+
+            try
             {
-                Logger.LogInformation("🛑 بدء إيقاف ServiceContainer...");
+                AutoBackupService.StopAsync().Wait();
+                Logger.LogInformation("✅ تم إيقاف AutoBackupService");
 
-                try
-                {
-                    // إيقاف خدمة النسخ التلقائي
-                    if (_autoBackupService != null)
-                    {
-                        _autoBackupService.StopAsync().Wait();
-                        Logger.LogInformation("✅ تم إيقاف AutoBackupService");
-                    }
+                ScheduledBackupService.StopAsync().Wait();
+                Logger.LogInformation("✅ تم إيقاف ScheduledBackupService");
 
-                    // إيقاف خدمة النسخ المجدول
-                    if (_scheduledBackupService != null)
-                    {
-                        _scheduledBackupService.StopAsync().Wait();
-                        Logger.LogInformation("✅ تم إيقاف ScheduledBackupService");
-                    }
+                DailyTaskService.Stop();
+                Logger.LogInformation("✅ تم إيقاف DailyTaskService");
 
-                    // إيقاف خدمة المهام اليومية
-                    if (_dailyTaskService != null)
-                    {
-                        _dailyTaskService.Stop();
-                        Logger.LogInformation("✅ تم إيقاف DailyTaskService");
-                    }
-
-                    Logger.LogInformation("✅ تم إيقاف ServiceContainer بنجاح");
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogError($"❌ خطأ أثناء إيقاف ServiceContainer: {ex.Message}", ex);
-                }
-                finally
-                {
-                    _isInitialized = false;
-                }
+                Logger.LogInformation("✅ تم إيقاف ServiceContainer بنجاح");
             }
-        }
-
-        /// <summary>
-        /// إعادة تعيين جميع الخدمات (للاختبارات فقط)
-        /// </summary>
-        public static void Reset()
-        {
-            lock (_lock)
+            catch (Exception ex)
             {
-                Logger.LogWarning("⚠️ إعادة تعيين ServiceContainer...");
-                
-                Shutdown();
-                
-                _logger = null;
-                _backupService = null;
-                _autoBackupService = null;
-                _scheduledBackupService = null;
-                _dailyTaskService = null;
-                _googleDriveService = null;
+                Logger.LogError($"❌ خطأ أثناء إيقاف ServiceContainer: {ex.Message}", ex);
+            }
+            finally
+            {
                 _isInitialized = false;
             }
         }
 
         /// <summary>
-        /// تهيئة للاختبارات - يسمح بحقن الخدمات الوهمية
-        /// </summary>
-        public static void InitializeForTesting(
-            ILogger? logger = null,
-            BackupRestoreService? backupService = null,
-            IAutoBackupService? autoBackupService = null,
-            IScheduledBackupService? scheduledBackupService = null)
-        {
-            lock (_lock)
-            {
-                _logger = logger;
-                _backupService = backupService;
-                _autoBackupService = autoBackupService;
-                _scheduledBackupService = scheduledBackupService;
-                _isInitialized = true;
-                
-                Logger.LogInformation("✅ تم تهيئة ServiceContainer لوضع الاختبار");
-            }
-        }
-
-        /// <summary>
-        /// الحصول على مسار ملف اعتماد Google Drive
+        /// الحصول على مسار ملف اعتماد Google Drive (يُستخدم من تسجيل DI أيضاً).
         /// </summary>
         internal static string GetGoogleDriveCredentialsPath()
         {
@@ -369,7 +120,7 @@ namespace BackupDbServer.Helpers
                         PropertyNameCaseInsensitive = true
                     };
                     var config = JsonSerializer.Deserialize<AutoBackupConfig>(configJson, options);
-                    
+
                     if (!string.IsNullOrEmpty(config?.GoogleDriveCredentialsPath))
                     {
                         return config.GoogleDriveCredentialsPath;
@@ -409,10 +160,5 @@ namespace BackupDbServer.Helpers
                 Logger.LogError($"❌ فشل بدء خدمة النسخ التلقائي: {ex.Message}", ex);
             }
         }
-
-        /// <summary>
-        /// التحقق من تهيئة ServiceContainer
-        /// </summary>
-        public static bool IsInitialized => _isInitialized;
     }
 }
