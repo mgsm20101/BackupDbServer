@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Threading;
 using BackupDbServer.Helpers;
 using System.ComponentModel;
 
@@ -8,6 +11,10 @@ namespace BackupDbServer.Views
     {
         private TrayIconManager? _trayIconManager;
         private FileLogger? _logger;
+
+        // مؤقّت الخمول: يقفل البرنامج بعد 10 دقائق من عدم النشاط
+        private DispatcherTimer? _idleTimer;
+        private static readonly TimeSpan IdleTimeout = TimeSpan.FromMinutes(10);
 
         public MainWindow()
         {
@@ -49,7 +56,10 @@ namespace BackupDbServer.Views
                 
                 // معالجة إغلاق النافذة لإخفائها بدلاً من الإغلاق
                 this.Closing += MainWindow_Closing;
-                
+
+                // إعداد قفل الخمول (10 دقائق)
+                InitializeIdleLock();
+
                 _logger?.LogInformation("تم تهيئة أيقونة شريط المهام بنجاح");
             }
             catch (Exception ex)
@@ -102,7 +112,11 @@ namespace BackupDbServer.Views
                 // منع الإغلاق الفعلي للنافذة، وإخفاؤها بدلاً من ذلك
                 e.Cancel = true;
                 this.Hide();
-                
+
+                // الإغلاق من زر ويندوز (X) → قفل البرنامج ليُطلب كلمة السر عند العودة من التاسك بار
+                ServiceContainer.AppLock.Lock();
+                _idleTimer?.Stop();
+
                 // إظهار إشعار للمستخدم
                 _trayIconManager?.ShowBalloonTip(
                     "نظام النسخ الاحتياطي", 
@@ -116,6 +130,88 @@ namespace BackupDbServer.Views
                 _logger?.LogError("خطأ في معالج إغلاق النافذة", ex);
                 // في حالة الخطأ، نسمح بالإغلاق
                 e.Cancel = false;
+            }
+        }
+
+        /// <summary>
+        /// فتح قائمة الإجراءات لصف قاعدة البيانات عند النقر على الزر.
+        /// </summary>
+        private void DatabaseActions_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button button && button.ContextMenu != null)
+            {
+                button.ContextMenu.PlacementTarget = button;
+                button.ContextMenu.IsOpen = true;
+            }
+        }
+
+        /// <summary>
+        /// إعداد قفل الخمول: بعد 10 دقائق دون نشاط يُقفل البرنامج ويُخفى إلى الصينية.
+        /// </summary>
+        private void InitializeIdleLock()
+        {
+            _idleTimer = new DispatcherTimer { Interval = IdleTimeout };
+            _idleTimer.Tick += IdleTimer_Tick;
+
+            // إعادة ضبط المؤقّت عند أي نشاط للمستخدم
+            this.PreviewMouseMove += (_, _) => ResetIdleTimer();
+            this.PreviewMouseDown += (_, _) => ResetIdleTimer();
+            this.PreviewKeyDown += (_, _) => ResetIdleTimer();
+
+            // تشغيل/إيقاف المؤقّت حسب ظهور النافذة
+            this.IsVisibleChanged += (_, e) =>
+            {
+                if ((bool)e.NewValue)
+                {
+                    ResetIdleTimer();
+                }
+                else
+                {
+                    _idleTimer?.Stop();
+                }
+            };
+
+            if (this.IsVisible)
+            {
+                ResetIdleTimer();
+            }
+        }
+
+        /// <summary>
+        /// إعادة ضبط مؤقّت الخمول (يعمل فقط إذا كانت الحماية مفعّلة).
+        /// </summary>
+        private void ResetIdleTimer()
+        {
+            if (_idleTimer == null) return;
+
+            _idleTimer.Stop();
+            if (ServiceContainer.AppLock.IsEnabled)
+            {
+                _idleTimer.Start();
+            }
+        }
+
+        /// <summary>
+        /// عند انقضاء مهلة الخمول: قفل البرنامج وإخفاؤه إلى الصينية.
+        /// </summary>
+        private void IdleTimer_Tick(object? sender, System.EventArgs e)
+        {
+            try
+            {
+                _idleTimer?.Stop();
+                if (!ServiceContainer.AppLock.IsEnabled) return;
+
+                ServiceContainer.AppLock.Lock();
+                this.Hide();
+                _trayIconManager?.ShowBalloonTip(
+                    "نظام النسخ الاحتياطي",
+                    "تم قفل البرنامج بعد فترة خمول. أدخل كلمة السر لإظهاره مجدداً.",
+                    Hardcodet.Wpf.TaskbarNotification.BalloonIcon.Info);
+                _logger?.LogInformation("تم قفل البرنامج تلقائياً بعد مهلة الخمول");
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError("خطأ في معالج مهلة الخمول", ex);
             }
         }
 

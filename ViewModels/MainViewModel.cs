@@ -31,6 +31,9 @@ namespace BackupDbServer.ViewModels
         private System.Windows.Threading.DispatcherTimer _progressUpdateTimer;
         private TrayIconManager? _trayIconManager;
 
+        // ViewModel صيانة وتسريع IIS (مُستضاف في تبويب «إدارة IIS»)
+        public IisMaintenanceViewModel IisMaintenance { get; } = new IisMaintenanceViewModel();
+
         // إضافة instance من Settings
         private Settings _settings;
         public Settings Settings
@@ -355,6 +358,9 @@ namespace BackupDbServer.ViewModels
         public ICommand SelectAllCommand { get; }
         public ICommand UnselectAllCommand { get; }
         public ICommand ExecuteSqlForAllCommand { get; }
+        public ICommand EnableMaintenanceAllCommand { get; }
+        public ICommand DisableMaintenanceAllCommand { get; }
+        public ICommand RefreshMaintenanceAllCommand { get; }
         public ICommand? CopyDatabaseCommand { get; }
         public ICommand RunOperationsOnNewDbCommand { get; }
         public ICommand BrowseIisSourceCommand { get; }
@@ -462,6 +468,9 @@ namespace BackupDbServer.ViewModels
             OpenCopyDatabaseCommand = new RelayCommand(OpenCopyDatabase, CanExecuteOperation);
 
             ExecuteSqlForAllCommand = new AsyncRelayCommand(ExecuteSqlForAllAsync, CanExecuteOperation);
+            EnableMaintenanceAllCommand = new AsyncRelayCommand(_ => ApplyMaintenanceToAllAsync(true), CanExecuteOperation);
+            DisableMaintenanceAllCommand = new AsyncRelayCommand(_ => ApplyMaintenanceToAllAsync(false), CanExecuteOperation);
+            RefreshMaintenanceAllCommand = new AsyncRelayCommand(_ => RefreshMaintenanceAllAsync(), CanExecuteOperation);
             RunOperationsOnNewDbCommand = new AsyncRelayCommand(RunOperationsOnNewDbAsync, CanExecuteOperation);
             BrowseIisSourceCommand = new RelayCommand(BrowseIisSource);
             BrowseIisDestinationCommand = new RelayCommand(BrowseIisDestination);
@@ -630,6 +639,7 @@ namespace BackupDbServer.ViewModels
                     foreach (var dbName in dbNames)
                     {
                         var dbViewModel = new DatabaseSelectionViewModel { DatabaseName = dbName, IsSelected = savedSelection.Contains(dbName) };
+                        WireMaintenanceCommands(dbViewModel);
                         Databases.Add(dbViewModel);
                     }
                 });
@@ -658,6 +668,185 @@ namespace BackupDbServer.ViewModels
             finally
             {
                 IsBusy = false;
+            }
+        }
+
+        // ===== صيانة XmlPath لكل قاعدة بيانات =====
+
+        /// <summary>ربط أوامر صيانة XmlPath بعنصر القاعدة.</summary>
+        private void WireMaintenanceCommands(DatabaseSelectionViewModel db)
+        {
+            db.EnableMaintenanceCommand = new AsyncRelayCommand(_ => ToggleMaintenanceAsync(db, true));
+            db.DisableMaintenanceCommand = new AsyncRelayCommand(_ => ToggleMaintenanceAsync(db, false));
+            db.RefreshMaintenanceCommand = new AsyncRelayCommand(_ => RefreshMaintenanceStateAsync(db));
+        }
+
+        /// <summary>تفعيل/استرجاع صيانة XmlPath لقاعدة محددة مع تأكيد المستخدم.</summary>
+        private async Task ToggleMaintenanceAsync(DatabaseSelectionViewModel db, bool enable)
+        {
+            var action = enable ? "إيقاف عمل XML للصيانة" : "استرجاع عمل XML";
+            var confirm = System.Windows.MessageBox.Show(
+                $"هل أنت متأكد من «{action}» لقاعدة البيانات: {db.DatabaseName}؟\n" +
+                (enable
+                    ? "سيتم تعديل الإجراء SP_Company_SelectAll ليُرجِع XmlPath = NULL (تعطيل تطبيق العميل)."
+                    : "سيتم استرجاع الإجراء SP_Company_SelectAll إلى حالته الأصلية."),
+                "تأكيد عملية الصيانة",
+                MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (confirm != MessageBoxResult.Yes)
+                return;
+
+            try
+            {
+                IsBusy = true;
+                StatusText = $"{action} لـ {db.DatabaseName}...";
+
+                if (enable)
+                    await ServiceContainer.XmlMaintenance.EnableMaintenanceAsync(db.DatabaseName);
+                else
+                    await ServiceContainer.XmlMaintenance.DisableMaintenanceAsync(db.DatabaseName);
+
+                db.MaintenanceState = enable ? MaintenanceState.Maintenance : MaintenanceState.Normal;
+
+                StatusText = $"تم {action} لـ {db.DatabaseName} بنجاح.";
+                LogEntry("صيانة XmlPath", "نجح", db.DatabaseName, action);
+                System.Windows.MessageBox.Show($"تم {action} لقاعدة البيانات {db.DatabaseName} بنجاح.",
+                    "تم", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                StatusText = $"فشل {action} لـ {db.DatabaseName}.";
+                LogEntry("صيانة XmlPath", "فشل", db.DatabaseName, ex.Message);
+                System.Windows.MessageBox.Show($"تعذّر {action}:\n{ex.Message}",
+                    "خطأ", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        /// <summary>تطبيق صيانة XmlPath (إيقاف/استرجاع) على كل قواعد البيانات.</summary>
+        private async Task ApplyMaintenanceToAllAsync(bool enable)
+        {
+            var dbs = Databases.ToList();
+            if (!dbs.Any())
+            {
+                System.Windows.MessageBox.Show("لا توجد قواعد بيانات. اضغط «تحديث» أولاً.", "تنبيه",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var action = enable ? "إيقاف XML للصيانة" : "استرجاع XML";
+            var confirm = System.Windows.MessageBox.Show(
+                $"هل أنت متأكد من تطبيق «{action}» على كل قواعد البيانات ({dbs.Count})؟\n" +
+                (enable
+                    ? "سيتم تعديل SP_Company_SelectAll في كل قاعدة بها هذا الإجراء (XmlPath = القيمة + '1')."
+                    : "سيتم استرجاع SP_Company_SelectAll الأصلي في كل القواعد."),
+                "تأكيد صيانة XML للكل",
+                MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (confirm != MessageBoxResult.Yes)
+                return;
+
+            IsBusy = true;
+            int ok = 0, skipped = 0, failed = 0;
+            try
+            {
+                foreach (var db in dbs)
+                {
+                    try
+                    {
+                        if (enable)
+                            await ServiceContainer.XmlMaintenance.EnableMaintenanceAsync(db.DatabaseName);
+                        else
+                            await ServiceContainer.XmlMaintenance.DisableMaintenanceAsync(db.DatabaseName);
+
+                        db.MaintenanceState = enable ? MaintenanceState.Maintenance : MaintenanceState.Normal;
+                        ok++;
+                        StatusText = $"{action}: {db.DatabaseName} ({ok + skipped + failed}/{dbs.Count})";
+                    }
+                    catch (InvalidOperationException ex) when (ex.Message.Contains("SP_Company_SelectAll"))
+                    {
+                        // قاعدة لا تحتوي الإجراء — تخطّي بدون اعتبارها فشلاً
+                        db.MaintenanceState = MaintenanceState.NotAvailable;
+                        skipped++;
+                    }
+                    catch (Exception ex)
+                    {
+                        failed++;
+                        LogEntry("صيانة XML (الكل)", "فشل", db.DatabaseName, ex.Message);
+                    }
+                }
+
+                StatusText = $"اكتمل {action} للكل — نجح {ok}، تخطّي {skipped}، فشل {failed}.";
+                LogEntry("صيانة XML (الكل)", failed == 0 ? "نجح" : "جزئي", "",
+                    $"{action}: نجح {ok}، تخطّي {skipped}، فشل {failed} من {dbs.Count}");
+                System.Windows.MessageBox.Show(
+                    $"اكتمل «{action}» للكل:\n✅ نجح: {ok}\n⏭️ تخطّي (لا يحتوي الإجراء): {skipped}\n❌ فشل: {failed}",
+                    "النتيجة", MessageBoxButton.OK,
+                    failed == 0 ? MessageBoxImage.Information : MessageBoxImage.Warning);
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        /// <summary>تحديث حالة صيانة XmlPath لكل القواعد.</summary>
+        private async Task RefreshMaintenanceAllAsync()
+        {
+            var dbs = Databases.ToList();
+            if (!dbs.Any())
+            {
+                System.Windows.MessageBox.Show("لا توجد قواعد بيانات. اضغط «تحديث» أولاً.", "تنبيه",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                int done = 0;
+                foreach (var db in dbs)
+                {
+                    try
+                    {
+                        db.MaintenanceState = await ServiceContainer.XmlMaintenance.GetStateAsync(db.DatabaseName);
+                    }
+                    catch
+                    {
+                        db.MaintenanceState = MaintenanceState.NotAvailable;
+                    }
+                    done++;
+                    StatusText = $"تحديث حالة XML... ({done}/{dbs.Count})";
+                }
+                StatusText = "تم تحديث حالة XML لكل القواعد.";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        /// <summary>تحديث حالة صيانة XmlPath لقاعدة محددة.</summary>
+        private async Task RefreshMaintenanceStateAsync(DatabaseSelectionViewModel db)
+        {
+            try
+            {
+                var state = await ServiceContainer.XmlMaintenance.GetStateAsync(db.DatabaseName);
+                db.MaintenanceState = state;
+                if (state == MaintenanceState.NotAvailable)
+                {
+                    System.Windows.MessageBox.Show(
+                        $"قاعدة البيانات {db.DatabaseName} لا تحتوي على الإجراء SP_Company_SelectAll — ميزة الصيانة غير متاحة لها.",
+                        "غير متاح", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"تعذّر قراءة حالة الصيانة لـ {db.DatabaseName}:\n{ex.Message}",
+                    "خطأ", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -720,8 +909,9 @@ namespace BackupDbServer.ViewModels
 
             try
             {
-                await _backupService.BackupDatabasesAsync(selectedDbs, progress);
-                
+                // تشغيل النسخ الاحتياطي على خيط خلفي حتى لا تتجمّد الواجهة (Progress يعيد التحديثات للواجهة تلقائياً)
+                await Task.Run(() => _backupService.BackupDatabasesAsync(selectedDbs, progress));
+
                 var duration = (DateTime.Now - startTime).ToString(@"mm\:ss");
                 
                 // تحديث التقدم إلى 100% قبل الإكمال

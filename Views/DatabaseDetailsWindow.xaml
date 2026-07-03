@@ -1,16 +1,39 @@
 ﻿<Window x:Class="BackupDbServer.Views.DatabaseDetailsWindow"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:BackupDbServer.Views"
-      mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
-      Title="DatabaseDetailsWindow">
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:local="clr-namespace:BackupDbServer.Views"
+        mc:Ignorable="d" 
+        Height="500" Width="800"
+        Title="تفاصيل قاعدة البيانات"
+        Background="{StaticResource MainBackgroundBrush}"
+        Foreground="{StaticResource TextMainBrush}"
+        FontFamily="{StaticResource ModernFontFamily}"
+        FlowDirection="RightToLeft"
+        WindowStartupLocation="CenterScreen">
 
-    <Grid Margin="10">
-        <TextBlock x:Name="HeaderText" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
-        <DataGrid x:Name="DetailsGrid" AutoGenerateColumns="False" IsReadOnly="True">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Style="{StaticResource ModernCardStyle}" Margin="0,0,0,16" Background="{StaticResource SurfaceBrush}" Padding="15">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Path Data="{StaticResource Icon.Server}" Fill="{StaticResource PrimaryAccentBrush}" Width="24" Height="24" Stretch="Uniform" Margin="0,0,12,0"/>
+                <TextBlock x:Name="HeaderText" 
+                           Style="{StaticResource ModernHeaderStyle}"
+                           FontSize="18" 
+                           VerticalAlignment="Center"
+                           Margin="0"/>
+            </StackPanel>
+        </Border>
+
+        <DataGrid Grid.Row="1" x:Name="DetailsGrid" 
+                  Style="{StaticResource ModernDataGridStyle}"
+                  AutoGenerateColumns="False" 
+                  IsReadOnly="True">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="التاريخ والوقت" Binding="{Binding BackupTime}" Width="200"/>
                 <DataGridTextColumn Header="الحالة" Binding="{Binding Status}" Width="100"/>
@@ -18,5 +41,4 @@
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
-
 </Window>

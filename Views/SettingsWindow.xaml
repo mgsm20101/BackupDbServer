@@ -7,89 +7,205 @@
         xmlns:converters="clr-namespace:BackupDbServer.Converters"
         mc:Ignorable="d"
         Title="الإعدادات" Height="700" Width="500"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource MainBackgroundBrush}"
+        Foreground="{StaticResource TextMainBrush}"
+        FontFamily="{StaticResource ModernFontFamily}">
     
     <Window.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <converters:ConnectionStatusColorConverter x:Key="StatusColorConverter"/>
-        
-        <Style x:Key="GroupBoxStyle" TargetType="GroupBox">
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="Padding" Value="10"/>
-            <Setter Property="BorderBrush" Value="LightGray"/>
-            <Setter Property="BorderThickness" Value="1"/>
-        </Style>
-        
-        <Style x:Key="ActionButtonStyle" TargetType="Button">
-            <Setter Property="Padding" Value="10,5"/>
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
     </Window.Resources>
     
-    <ScrollViewer>
-        <StackPanel Margin="15">
+    <ScrollViewer x:Name="SettingsScroller">
+        <StackPanel Margin="16">
             
             <!-- نوع الاتصال -->
-            <GroupBox Header="🔗 نوع الاتصال" Style="{StaticResource GroupBoxStyle}">
+            <Border Style="{StaticResource ModernCardStyle}">
                 <StackPanel>
-                    <RadioButton Content="🖥️ SQL Server محلي" 
-                                 IsChecked="{Binding IsLocalConnection}" 
-                                 Margin="5" FontSize="12"/>
-                    <RadioButton Content="🐳 SQL Server على Docker" 
-                                 IsChecked="{Binding IsDockerConnection}" 
-                                 Margin="5" FontSize="12"/>
-                    <RadioButton Content="🌐 SQL Server بعيد" 
-                                 IsChecked="{Binding IsRemoteConnection}" 
-                                 Margin="5" FontSize="12"/>
-                </StackPanel>
-            </GroupBox>
-
-            <!-- إعدادات الخادم المحلي/البعيد -->
-            <GroupBox Header="⚙️ إعدادات الخادم" Style="{StaticResource GroupBoxStyle}"
-                      Visibility="{Binding IsDockerConnection, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Inverted}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="اسم الخادم:" 
-                               VerticalAlignment="Center" Margin="0,0,10,5"/>
-                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Server}" 
-                             Margin="0,0,0,5" Height="25"/>
-
-                    <CheckBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
-                              Content="استخدام منفذ مخصص" 
-                              IsChecked="{Binding UseCustomPort}" 
-                              Margin="0,5"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                        <Path Data="{StaticResource Icon.Link}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                        <TextBlock Text="نوع الاتصال" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                    </StackPanel>
                     
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="رقم المنفذ:" 
-                               VerticalAlignment="Center" Margin="0,0,10,5"
-                               Visibility="{Binding UseCustomPort, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Port}" 
-                             Margin="0,0,0,5" Height="25"
-                             Visibility="{Binding UseCustomPort, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                </Grid>
-            </GroupBox>
+                    <RadioButton Content="SQL Server محلي" 
+                                 IsChecked="{Binding IsLocalConnection}" 
+                                 Margin="5" FontSize="13" Foreground="{StaticResource TextMainBrush}"/>
+                    <RadioButton Content="SQL Server على Docker" 
+                                 IsChecked="{Binding IsDockerConnection}" 
+                                 Margin="5" FontSize="13" Foreground="{StaticResource TextMainBrush}"/>
+                    <RadioButton Content="SQL Server بعيد" 
+                                 IsChecked="{Binding IsRemoteConnection}" 
+                                 Margin="5" FontSize="13" Foreground="{StaticResource TextMainBrush}"/>
+                </StackPanel>
+            </Border>
 
-            <!-- إعدادات Docker -->
-            <GroupBox Header="🐳 إعدادات Docker" Style="{StaticResource GroupBoxStyle}"
-                      Visibility="{Binding IsDockerConnection, Converter={StaticResource BoolToVisibilityConverter}}">
+            <!-- إعدادات الخادم -->
+            <Border Style="{StaticResource ModernCardStyle}"
+                    Visibility="{Binding IsDockerConnection, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Inverted}">
                 <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                        <Path Data="{StaticResource Icon.Server}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                        <TextBlock Text="إعدادات الخادم" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                    </StackPanel>
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="اسم الخادم:" 
+                                   VerticalAlignment="Center" Margin="0,0,10,10" Foreground="{StaticResource TextSubBrush}"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Server}" 
+                                 Margin="0,0,0,10" Height="30" Padding="5"
+                                 Background="{StaticResource MainBackgroundBrush}" 
+                                 Foreground="{StaticResource TextMainBrush}"
+                                 BorderBrush="{StaticResource SurfaceBrush}"/>
+
+                        <CheckBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                                  Content="استخدام منفذ مخصص" 
+                                  IsChecked="{Binding UseCustomPort}" 
+                                  Margin="0,5,0,10" Foreground="{StaticResource TextMainBrush}"/>
+                        
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="رقم المنفذ:" 
+                                   VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{StaticResource TextSubBrush}"
+                                   Visibility="{Binding UseCustomPort, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Port}" 
+                                 Height="30" Padding="5"
+                                 Background="{StaticResource MainBackgroundBrush}" 
+                                 Foreground="{StaticResource TextMainBrush}"
+                                 BorderBrush="{StaticResource SurfaceBrush}"
+                                 Visibility="{Binding UseCustomPort, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- إعدادات Docker -->
+            <Border Style="{StaticResource ModernCardStyle}"
+                    Visibility="{Binding IsDockerConnection, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                        <Path Data="{StaticResource Icon.Docker}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                        <TextBlock Text="إعدادات Docker" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="اسم الحاوية:" 
+                                       VerticalAlignment="Center" Margin="0,0,10,10" Foreground="{StaticResource TextSubBrush}"/>
+                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding DockerContainerName}" 
+                                     Margin="0,0,0,10" Height="30" Padding="5"
+                                     Background="{StaticResource MainBackgroundBrush}" 
+                                     Foreground="{StaticResource TextMainBrush}"
+                                     BorderBrush="{StaticResource SurfaceBrush}"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="رقم المنفذ:" 
+                                       VerticalAlignment="Center" Margin="0,0,10,10" Foreground="{StaticResource TextSubBrush}"/>
+                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Port}" 
+                                     Margin="0,0,0,10" Height="30" Padding="5"
+                                     Background="{StaticResource MainBackgroundBrush}" 
+                                     Foreground="{StaticResource TextMainBrush}"
+                                     BorderBrush="{StaticResource SurfaceBrush}"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="الحالة:" 
+                                       VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{StaticResource TextSubBrush}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DockerStatus}" 
+                                       VerticalAlignment="Center" FontWeight="Bold"
+                                       Foreground="{Binding DockerStatus, Converter={StaticResource StatusColorConverter}}"/>
+                        </Grid>
+
+                        <UniformGrid Rows="2" Columns="2" Margin="0,15,0,0">
+                            <Button Content="فحص الحالة" Style="{StaticResource ModernActionButtonStyle}" Height="35" Margin="2"
+                                    Command="{Binding CheckDockerStatusCommand}"/>
+                            <Button Content="إنشاء حاوية" Style="{StaticResource ModernActionButtonStyle}" Height="35" Margin="2"
+                                    Command="{Binding CreateDockerContainerCommand}"/>
+                            <Button Content="تشغيل" Style="{StaticResource ModernActionButtonStyle}" Height="35" Margin="2"
+                                    Command="{Binding StartDockerContainerCommand}"/>
+                            <Button Content="إيقاف" Style="{StaticResource ModernActionButtonStyle}" Height="35" Margin="2"
+                                    Command="{Binding StopDockerContainerCommand}"
+                                    Background="{StaticResource SurfaceBrush}" Foreground="{StaticResource TextMainBrush}"/>
+                        </UniformGrid>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- إعدادات المصادقة -->
+            <Border Style="{StaticResource ModernCardStyle}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                        <Path Data="{StaticResource Icon.Lock}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                        <TextBlock Text="إعدادات المصادقة" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <RadioButton Content="مصادقة Windows" 
+                                     IsChecked="{Binding UseWindowsAuthentication}" 
+                                     Margin="5" Foreground="{StaticResource TextMainBrush}"/>
+                        <RadioButton Content="مصادقة SQL Server" 
+                                     IsChecked="{Binding UseSqlAuthentication}" 
+                                     Margin="5" Foreground="{StaticResource TextMainBrush}"/>
+
+                        <Grid Visibility="{Binding UseSqlAuthentication, Converter={StaticResource BoolToVisibilityConverter}}" 
+                              Margin="20,15,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="اسم المستخدم:" 
+                                       VerticalAlignment="Center" Margin="0,0,10,10" Foreground="{StaticResource TextSubBrush}"/>
+                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Username}" 
+                                     Margin="0,0,0,10" Height="30" Padding="5"
+                                     Background="{StaticResource MainBackgroundBrush}" 
+                                     Foreground="{StaticResource TextMainBrush}"
+                                     BorderBrush="{StaticResource SurfaceBrush}"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="كلمة المرور:" 
+                                       VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{StaticResource TextSubBrush}"/>
+                            <PasswordBox Grid.Row="1" Grid.Column="1" Margin="0,0,0,0" Height="30" Padding="5"
+                                         Background="{StaticResource MainBackgroundBrush}" 
+                                         Foreground="{StaticResource TextMainBrush}"
+                                         BorderBrush="{StaticResource SurfaceBrush}"
+                                         PasswordChanged="PasswordBox_PasswordChanged"/>
+                            
+                            <Button Grid.Row="1" Grid.Column="2" Content="اختبار الاتصال" 
+                                    Width="100" Height="30" Margin="10,0,0,0" 
+                                    Style="{StaticResource ModernActionButtonStyle}"
+                                    Command="{Binding TestConnectionCommand}"/>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- إعدادات متقدمة -->
+            <Border Style="{StaticResource ModernCardStyle}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                        <Path Data="{StaticResource Icon.Settings}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                        <TextBlock Text="إعدادات متقدمة" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                    </StackPanel>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
@@ -97,49 +213,76 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="اسم الحاوية:" 
-                                   VerticalAlignment="Center" Margin="0,0,10,5"/>
-                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding DockerContainerName}" 
-                                 Margin="0,0,0,5" Height="25"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="مهلة الاتصال (ثانية):" 
+                                   VerticalAlignment="Center" Margin="0,0,10,10" Foreground="{StaticResource TextSubBrush}"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ConnectionTimeout}" 
+                                 Margin="0,0,0,10" Height="30" Padding="5"
+                                 Background="{StaticResource MainBackgroundBrush}" 
+                                 Foreground="{StaticResource TextMainBrush}"
+                                 BorderBrush="{StaticResource SurfaceBrush}"/>
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="رقم المنفذ:" 
-                                   VerticalAlignment="Center" Margin="0,0,10,5"/>
-                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Port}" 
-                                 Margin="0,0,0,5" Height="25"/>
+                        <CheckBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                                  Content="الثقة في شهادة الخادم" 
+                                  IsChecked="{Binding TrustServerCertificate}" 
+                                  Margin="0,5,0,10" Foreground="{StaticResource TextMainBrush}"/>
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="الحالة:" 
-                                   VerticalAlignment="Center" Margin="0,0,10,5"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DockerStatus}" 
-                                   VerticalAlignment="Center" FontWeight="Bold"
-                                   Foreground="{Binding DockerStatus, Converter={StaticResource StatusColorConverter}}"/>
+                        <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
+                                  Content="تشفير الاتصال" 
+                                  IsChecked="{Binding Encrypt}" 
+                                  Margin="0,5" Foreground="{StaticResource TextMainBrush}"/>
                     </Grid>
-
-                    <!-- أزرار إدارة Docker -->
-                    <UniformGrid Rows="2" Columns="2" Margin="0,10,0,0">
-                        <Button Content="فحص الحالة" Style="{StaticResource ActionButtonStyle}"
-                                Command="{Binding CheckDockerStatusCommand}"/>
-                        <Button Content="إنشاء حاوية" Style="{StaticResource ActionButtonStyle}"
-                                Command="{Binding CreateDockerContainerCommand}"/>
-                        <Button Content="تشغيل" Style="{StaticResource ActionButtonStyle}"
-                                Command="{Binding StartDockerContainerCommand}"/>
-                        <Button Content="إيقاف" Style="{StaticResource ActionButtonStyle}"
-                                Command="{Binding StopDockerContainerCommand}"/>
-                    </UniformGrid>
                 </StackPanel>
-            </GroupBox>
+            </Border>
 
-            <!-- إعدادات المصادقة -->
-            <GroupBox Header="🔐 إعدادات المصادقة" Style="{StaticResource GroupBoxStyle}">
+            <!-- حماية البرنامج بكلمة سر -->
+            <Border Style="{StaticResource ModernCardStyle}">
                 <StackPanel>
-                    <RadioButton Content="مصادقة Windows" 
-                                 IsChecked="{Binding UseWindowsAuthentication}" 
-                                 Margin="5"/>
-                    <RadioButton Content="مصادقة SQL Server" 
-                                 IsChecked="{Binding UseSqlAuthentication}" 
-                                 Margin="5"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                        <Path Data="{StaticResource Icon.Lock}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                        <TextBlock Text="حماية البرنامج بكلمة سر" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                    </StackPanel>
+                    <TextBlock Text="يُطلب كلمة السر عند إغلاق النافذة من زر ويندوز (X) وإعادة فتحها من شريط المهام، وكذلك بعد 10 دقائق من الخمول."
+                               Foreground="{StaticResource TextSubBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                    <TextBlock Text="{Binding AppLockStatusText}" FontWeight="Bold" FontSize="13"
+                               Foreground="{StaticResource TextMainBrush}" Margin="0,0,0,12"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="{Binding SetPasswordButtonText}" Height="35" Width="150" Margin="0,0,10,0"
+                                Style="{StaticResource ModernActionButtonStyle}"
+                                Command="{Binding SetOrChangePasswordCommand}"
+                                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+                        <Button Content="تعطيل الحماية" Height="35" Width="120"
+                                Background="{StaticResource SurfaceBrush}" Foreground="{StaticResource TextMainBrush}"
+                                BorderThickness="0"
+                                Command="{Binding DisableAppLockCommand}"
+                                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    </StackPanel>
 
-                    <Grid Visibility="{Binding UseSqlAuthentication, Converter={StaticResource BoolToVisibilityConverter}}" 
-                          Margin="20,10,0,0">
+                    <!-- استرجاع عند نسيان كلمة السر (الطريق الخلفي) -->
+                    <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="10" Margin="0,14,0,0">
+                        <StackPanel>
+                            <TextBlock Text="🔑 استرجاع عند نسيان كلمة السر" FontWeight="Bold" FontSize="13"
+                                       Foreground="{StaticResource TextMainBrush}" Margin="0,0,0,6"/>
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSubBrush}" FontSize="12">
+                                <Run Text="إذا نسيت كلمة السر: أنشئ ملفاً فارغاً بهذا المسار بالضبط ثم افتح البرنامج — سيُلغى القفل تلقائياً ويُحذف الملف:"/>
+                            </TextBlock>
+                            <TextBox Text="{Binding ResetFilePath, Mode=OneWay}" IsReadOnly="True"
+                                     TextWrapping="Wrap" FontFamily="Consolas" FontSize="11" Margin="0,6,0,0"
+                                     Background="{StaticResource MainBackgroundBrush}"
+                                     Foreground="{StaticResource TextMainBrush}"
+                                     BorderBrush="{StaticResource PrimaryAccentBrush}" Padding="6"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- مسارات النظام -->
+            <Border Style="{StaticResource ModernCardStyle}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                        <Path Data="{StaticResource Icon.Folder}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                        <TextBlock Text="مسارات النظام" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                    </StackPanel>
+                    <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
@@ -150,107 +293,77 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="اسم المستخدم:" 
-                                   VerticalAlignment="Center" Margin="0,0,10,5"/>
-                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Username}" 
-                                 Margin="0,0,0,5" Height="25"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="المسار المؤقت:" 
+                                   VerticalAlignment="Center" Margin="0,0,10,10" Foreground="{StaticResource TextSubBrush}"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding TempPath}" 
+                                 Margin="0,0,0,10" Height="30" Padding="5"
+                                 Background="{StaticResource MainBackgroundBrush}" 
+                                 Foreground="{StaticResource TextMainBrush}"
+                                 BorderBrush="{StaticResource SurfaceBrush}"/>
+                        <Button Grid.Row="0" Grid.Column="2" Content="..." ToolTip="استعراض" 
+                                Margin="5,0,0,10" Width="35" Height="30"
+                                Style="{StaticResource ModernActionButtonStyle}"
+                                Command="{Binding BrowseCommand}" CommandParameter="Temp"/>
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="كلمة المرور:" 
-                                   VerticalAlignment="Center" Margin="0,0,10,0"/>
-                        <PasswordBox Grid.Row="1" Grid.Column="1" Margin="0,0,0,5" Height="25"
-                                     PasswordChanged="PasswordBox_PasswordChanged"/>
-                        
-                        <!-- زر اختبار الاتصال -->
-                        <Button Grid.Row="1" Grid.Column="2" Content="اختبار الاتصال" 
-                                Margin="10,0,0,5" Style="{StaticResource ActionButtonStyle}"
-                                Command="{Binding TestConnectionCommand}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="مسار النسخ الاحتياطي:" 
+                                   VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{StaticResource TextSubBrush}"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding BackupPath}" 
+                                 Height="30" Padding="5"
+                                 Background="{StaticResource MainBackgroundBrush}" 
+                                 Foreground="{StaticResource TextMainBrush}"
+                                 BorderBrush="{StaticResource SurfaceBrush}"/>
+                        <Button Grid.Row="1" Grid.Column="2" Content="..." ToolTip="استعراض" 
+                                Margin="5,0,0,0" Width="35" Height="30"
+                                Style="{StaticResource ModernActionButtonStyle}"
+                                Command="{Binding BrowseCommand}" CommandParameter="Backup"/>
                     </Grid>
                 </StackPanel>
-            </GroupBox>
-
-            <!-- إعدادات متقدمة -->
-            <GroupBox Header="⚙️ إعدادات متقدمة" Style="{StaticResource GroupBoxStyle}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="مهلة الاتصال (ثانية):" 
-                               VerticalAlignment="Center" Margin="0,0,10,5"/>
-                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ConnectionTimeout}" 
-                             Margin="0,0,0,5" Height="25"/>
-
-                    <CheckBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
-                              Content="الثقة في شهادة الخادم" 
-                              IsChecked="{Binding TrustServerCertificate}" 
-                              Margin="0,5"/>
-
-                    <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
-                              Content="تشفير الاتصال" 
-                              IsChecked="{Binding Encrypt}" 
-                              Margin="0,5"/>
-                </Grid>
-            </GroupBox>
-
-            <!-- مسارات النظام -->
-            <GroupBox Header="📁 مسارات النظام" Style="{StaticResource GroupBoxStyle}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="المسار المؤقت:" 
-                               VerticalAlignment="Center" Margin="0,0,10,5"/>
-                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding TempPath}" 
-                             Margin="0,0,0,5" Height="25"/>
-                    <Button Grid.Row="0" Grid.Column="2" Content="..." ToolTip="استعراض" 
-                            Margin="5,0,0,5" Style="{StaticResource ActionButtonStyle}"
-                            Command="{Binding BrowseCommand}" CommandParameter="Temp"/>
-
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="مسار النسخ الاحتياطي:" 
-                               VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding BackupPath}" 
-                             Margin="0,0,0,5" Height="25"/>
-                    <Button Grid.Row="1" Grid.Column="2" Content="..." ToolTip="استعراض" 
-                            Margin="5,0,0,5" Style="{StaticResource ActionButtonStyle}"
-                            Command="{Binding BrowseCommand}" CommandParameter="Backup"/>
-                </Grid>
-            </GroupBox>
+            </Border>
 
             <!-- معاينة سلسلة الاتصال -->
-            <GroupBox Header="🔗 معاينة سلسلة الاتصال" Style="{StaticResource GroupBoxStyle}">
-                <TextBox Text="{Binding ConnectionString}" IsReadOnly="True" 
-                         TextWrapping="Wrap" Height="60" 
-                         FontFamily="Consolas" FontSize="10"
-                         Background="LightGray"/>
-            </GroupBox>
+            <Border Style="{StaticResource ModernCardStyle}">
+                <StackPanel>
+                     <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                        <Path Data="{StaticResource Icon.Link}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                        <TextBlock Text="معاينة سلسلة الاتصال" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                    </StackPanel>
+                    <TextBox Text="{Binding ConnectionString}" IsReadOnly="True" 
+                             TextWrapping="Wrap" Height="60" 
+                             FontFamily="Consolas" FontSize="11"
+                             Background="{StaticResource MainBackgroundBrush}"
+                             Foreground="{StaticResource TextMainBrush}"
+                             BorderBrush="{StaticResource SurfaceBrush}"
+                             Padding="8"/>
+                </StackPanel>
+            </Border>
 
             <!-- مؤشر التحميل لاختبار الاتصال -->
-            <ProgressBar Height="5" Margin="5" IsIndeterminate="True"
+            <ProgressBar Height="10" Margin="5" IsIndeterminate="True"
+                         Style="{StaticResource ModernProgressBarStyle}"
                          Visibility="{Binding IsTestingConnection, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
             <!-- أزرار الحفظ والإلغاء -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
-                <Button Content="💾 حفظ" Width="100" Height="35" Margin="5"
-                        Style="{StaticResource ActionButtonStyle}"
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,10">
+                <Button Width="110" Height="40" Margin="5"
+                        Style="{StaticResource ModernActionButtonStyle}"
                         Command="{Binding SaveCommand}"
-                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
-                <Button Content="❌ إلغاء" Width="100" Height="35" Margin="5"
-                        Style="{StaticResource ActionButtonStyle}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource Icon.Save}" Fill="{StaticResource MainBackgroundBrush}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                        <TextBlock Text="حفظ الإعدادات"/>
+                    </StackPanel>
+                </Button>
+                <Button Width="110" Height="40" Margin="5"
+                        Style="{StaticResource ModernActionButtonStyle}"
+                        Background="{StaticResource SurfaceBrush}"
+                        Foreground="{StaticResource TextMainBrush}"
                         Command="{Binding CloseWindowCommand}"
-                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource Icon.Cancel}" Fill="{StaticResource TextMainBrush}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                        <TextBlock Text="إلغاء"/>
+                    </StackPanel>
+                </Button>
             </StackPanel>
             
         </StackPanel>

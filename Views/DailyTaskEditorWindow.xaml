@@ -4,133 +4,178 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="تحرير المهمة اليومية" Height="650" Width="700"
+        Title="تحرير المهمة اليومية" Height="700" Width="750"
         FlowDirection="RightToLeft"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource MainBackgroundBrush}"
+        Foreground="{StaticResource TextMainBrush}"
+        FontFamily="{StaticResource ModernFontFamily}">
 
-    <Window.Resources>
-        <Style x:Key="LabelStyle" TargetType="Label">
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Margin" Value="0,5,5,0"/>
-        </Style>
-        <Style x:Key="TextBoxStyle" TargetType="TextBox">
-            <Setter Property="Margin" Value="0,5,0,0"/>
-            <Setter Property="Padding" Value="5"/>
-            <Setter Property="Height" Value="25"/>
-        </Style>
-    </Window.Resources>
-
-    <Grid Margin="15">
+    <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- العنوان -->
-        <Border Grid.Row="0" Background="#FF3F51B5" Padding="10" CornerRadius="4" Margin="0,0,0,10">
-            <TextBlock Text="⚙ إعدادات المهمة اليومية"
-                       FontSize="16"
-                       FontWeight="Bold"
-                       Foreground="White"
-                       HorizontalAlignment="Center"/>
+        <!-- العنوان المحدث -->
+        <Border Grid.Row="0" Style="{StaticResource ModernCardStyle}" Margin="0,0,0,16" Background="{StaticResource SurfaceBrush}" Padding="15">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Path Data="{StaticResource Icon.Settings}" Fill="{StaticResource PrimaryAccentBrush}" Width="24" Height="24" Stretch="Uniform" Margin="0,0,12,0"/>
+                <TextBlock Text="إعدادات المهمة اليومية" 
+                           Style="{StaticResource ModernHeaderStyle}"
+                           FontSize="20" 
+                           VerticalAlignment="Center"
+                           Margin="0"/>
+            </StackPanel>
         </Border>
 
         <!-- المحتوى -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel>
                 <!-- الإعدادات الأساسية -->
-                <GroupBox Header="الإعدادات الأساسية" Margin="0,0,0,10" Padding="10">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <Label Grid.Row="0" Grid.Column="0" Content="اسم المهمة:" Style="{StaticResource LabelStyle}"/>
-                        <TextBox Grid.Row="0" Grid.Column="1" x:Name="TaskNameTextBox" Style="{StaticResource TextBoxStyle}"/>
-
-                        <CheckBox Grid.Row="1" Grid.Column="1" x:Name="IsEnabledCheckBox" Content="تفعيل المهمة" Margin="0,10,0,0"/>
-
-                        <Label Grid.Row="2" Grid.Column="0" Content="نوع المهمة:" Style="{StaticResource LabelStyle}"/>
-                        <ComboBox Grid.Row="2" Grid.Column="1" x:Name="TaskTypeComboBox" Margin="0,5,0,0" Height="25"
-                                  SelectionChanged="TaskTypeComboBox_SelectionChanged"/>
-
-                        <Label Grid.Row="3" Grid.Column="0" Content="وقت التنفيذ:" Style="{StaticResource LabelStyle}"/>
-                        <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,5,0,0">
-                            <TextBox x:Name="HourTextBox" Width="50" Height="25" Padding="5" Margin="0,0,5,0"/>
-                            <TextBlock Text=":" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                            <TextBox x:Name="MinuteTextBox" Width="50" Height="25" Padding="5"/>
+                <Border Style="{StaticResource ModernCardStyle}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                            <Path Data="{StaticResource Icon.Settings}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                            <TextBlock Text="الإعدادات الأساسية" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
                         </StackPanel>
-                    </Grid>
-                </GroupBox>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="اسم المهمة:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                            <TextBox Grid.Row="0" Grid.Column="1" x:Name="TaskNameTextBox" Height="35" Margin="0,0,0,12"/>
+
+                            <CheckBox Grid.Row="1" Grid.Column="1" x:Name="IsEnabledCheckBox" Content="تفعيل المهمة" Margin="0,0,0,12" Foreground="{StaticResource TextMainBrush}"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="نوع المهمة:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                            <ComboBox Grid.Row="2" Grid.Column="1" x:Name="TaskTypeComboBox" Height="35" Margin="0,0,0,12"
+                                      SelectionChanged="TaskTypeComboBox_SelectionChanged"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="نمط الجدولة:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,12"/>
+                            <ComboBox Grid.Row="3" Grid.Column="1" x:Name="ScheduleModeComboBox" Height="35" Margin="0,0,0,12"
+                                      SelectionChanged="ScheduleModeComboBox_SelectionChanged"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="التوقيت:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,0"/>
+
+                            <!-- النمط اليومي: ساعة ودقيقة -->
+                            <StackPanel Grid.Row="4" Grid.Column="1" x:Name="DailyPanel" Orientation="Horizontal">
+                                <TextBox x:Name="HourTextBox" Width="60" Height="35" HorizontalContentAlignment="Center"/>
+                                <TextBlock Text=":" VerticalAlignment="Center" Margin="10,0" FontSize="18" FontWeight="Bold"/>
+                                <TextBox x:Name="MinuteTextBox" Width="60" Height="35" HorizontalContentAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- نمط التكرار: كل فترة زمنية -->
+                            <StackPanel Grid.Row="4" Grid.Column="1" x:Name="IntervalPanel" Orientation="Horizontal" Visibility="Collapsed">
+                                <ComboBox x:Name="IntervalPresetComboBox" Width="160" Height="35"
+                                          SelectionChanged="IntervalPresetComboBox_SelectionChanged"/>
+                                <TextBox x:Name="CustomMinutesTextBox" Width="80" Height="35" Margin="10,0,0,0"
+                                         HorizontalContentAlignment="Center" Visibility="Collapsed"/>
+                                <TextBlock x:Name="CustomMinutesLabel" Text="دقيقة" VerticalAlignment="Center" Margin="8,0,0,0"
+                                           Foreground="{StaticResource TextSubBrush}" Visibility="Collapsed"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
 
                 <!-- إعدادات قاعدة البيانات -->
-                <GroupBox Header="قاعدة البيانات" Margin="0,0,0,10" Padding="10">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
-                                   Text="🔑 يتم استخدام إعدادات الاتصال الرئيسية من البرنامج" 
-                                   FontSize="11" Foreground="#FF4CAF50" Margin="0,0,0,10" FontWeight="Bold"/>
-
-                        <Label Grid.Row="1" Grid.Column="0" Content="قاعدة البيانات:" Style="{StaticResource LabelStyle}"/>
-                        <Grid Grid.Row="1" Grid.Column="1">
+                <Border Style="{StaticResource ModernCardStyle}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                            <Path Data="{StaticResource Icon.Server}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                            <TextBlock Text="قاعدة البيانات" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                        </StackPanel>
+                        <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <ComboBox Grid.Column="0" x:Name="DatabaseNameComboBox" 
-                                      Margin="0,5,0,0" Height="25" 
-                                      IsEditable="True"/>
-                            <Button Grid.Column="1" Content="🔄" Width="30" Height="25" 
-                                    Margin="5,5,0,0" ToolTip="تحديث قائمة قواعد البيانات"
-                                    Click="RefreshDatabases_Click"/>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Background="#1A2E1A" Padding="12" CornerRadius="8" Margin="0,0,0,15">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource Icon.Link}" Fill="#4CAF50" Width="14" Height="14" Stretch="Uniform" Margin="0,0,10,0"/>
+                                    <TextBlock Text="يتم استخدام إعدادات الاتصال الرئيسية من البرنامج" 
+                                               FontSize="12" Foreground="#4CAF50" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="قاعدة البيانات:" VerticalAlignment="Center" Foreground="{StaticResource TextSubBrush}" Margin="0,0,15,0"/>
+                            <Grid Grid.Row="1" Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <ComboBox Grid.Column="0" x:Name="DatabaseNameComboBox" 
+                                          Height="35" IsEditable="True"/>
+                                <Button Grid.Column="1" Width="40" Height="35" 
+                                        Margin="10,0,0,0" ToolTip="تحديث قائمة قواعد البيانات"
+                                        Style="{StaticResource ModernActionButtonStyle}"
+                                        Click="RefreshDatabases_Click">
+                                    <Path Data="{StaticResource Icon.Refresh}" Fill="{StaticResource MainBackgroundBrush}" Width="14" Height="14" Stretch="Uniform"/>
+                                </Button>
+                            </Grid>
                         </Grid>
-                    </Grid>
-                </GroupBox>
+                    </StackPanel>
+                </Border>
 
                 <!-- محتوى المهمة -->
-                <GroupBox Header="محتوى المهمة" Margin="0,0,0,10" Padding="10">
+                <Border Style="{StaticResource ModernCardStyle}">
                     <StackPanel>
-                        <Label Content="نص SQL:" Style="{StaticResource LabelStyle}" x:Name="SqlScriptLabel"/>
-                        <TextBox x:Name="SqlScriptTextBox" 
-                                 Height="150" 
-                                 TextWrapping="Wrap" 
-                                 AcceptsReturn="True"
-                                 VerticalScrollBarVisibility="Auto"
-                                 FontFamily="Consolas"
-                                 Padding="5"
-                                 Margin="0,5,0,0"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                            <Path Data="{StaticResource Icon.History}" Fill="{StaticResource PrimaryAccentBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                            <TextBlock Text="محتوى المهمة" Style="{StaticResource ModernHeaderStyle}" FontSize="16" Margin="0"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="نص SQL:" Foreground="{StaticResource TextSubBrush}" x:Name="SqlScriptLabel" Margin="0,0,0,8"/>
+                            <TextBox x:Name="SqlScriptTextBox" 
+                                     Height="180" 
+                                     TextWrapping="Wrap" 
+                                     AcceptsReturn="True"
+                                     VerticalScrollBarVisibility="Auto"
+                                     FontFamily="Consolas"
+                                     Margin="0,0,0,0"/>
 
-                        <Label Content="اسم الإجراء المخزن:" Style="{StaticResource LabelStyle}" x:Name="StoredProcLabel" Visibility="Collapsed"/>
-                        <TextBox x:Name="StoredProcedureTextBox" Style="{StaticResource TextBoxStyle}" Visibility="Collapsed"/>
+                            <TextBlock Text="اسم الإجراء المخزن:" Foreground="{StaticResource TextSubBrush}" x:Name="StoredProcLabel" Visibility="Collapsed" Margin="0,0,0,8"/>
+                            <TextBox x:Name="StoredProcedureTextBox" Height="35" Visibility="Collapsed"/>
+                        </StackPanel>
                     </StackPanel>
-                </GroupBox>
+                </Border>
             </StackPanel>
         </ScrollViewer>
 
         <!-- الأزرار -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-            <Button Content="✅ حفظ" Width="100" Height="35" Margin="5" 
-                    Background="#FF4CAF50" Foreground="White" FontSize="14" FontWeight="Bold"
-                    Click="SaveButton_Click"/>
-            <Button Content="❌ إلغاء" Width="100" Height="35" Margin="5"
-                    Background="#FFF44336" Foreground="White" FontSize="14" FontWeight="Bold"
-                    Click="CancelButton_Click"/>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,16,0,0">
+            <Button Width="140" Height="45" Margin="8" 
+                    Style="{StaticResource ModernActionButtonStyle}"
+                    Click="SaveButton_Click">
+                <StackPanel Orientation="Horizontal">
+                    <Path Data="{StaticResource Icon.Save}" Fill="{StaticResource MainBackgroundBrush}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"/>
+                    <TextBlock Text="حفظ" FontSize="16" FontWeight="Bold"/>
+                </StackPanel>
+            </Button>
+            <Button Width="140" Height="45" Margin="8"
+                    Style="{StaticResource ModernActionButtonStyle}"
+                    Background="#37474F"
+                    Click="CancelButton_Click">
+                <StackPanel Orientation="Horizontal">
+                    <Path Data="{StaticResource Icon.Cancel}" Fill="{StaticResource MainBackgroundBrush}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,10,0"/>
+                    <TextBlock Text="إلغاء" FontSize="16" FontWeight="Bold"/>
+                </StackPanel>
+            </Button>
         </StackPanel>
     </Grid>
 </Window>

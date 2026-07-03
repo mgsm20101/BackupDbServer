@@ -202,6 +202,17 @@ namespace BackupDbServer.Helpers
         /// </summary>
         public void ShowMainWindow()
         {
+            // بوابة القفل: إن كان التطبيق مقفلاً، اطلب كلمة السر قبل الإظهار
+            var appLock = ServiceContainer.AppLock;
+            if (appLock.IsEnabled && appLock.IsLocked)
+            {
+                if (!appLock.TryUnlock(_mainWindow))
+                {
+                    // فشل/إلغاء فك القفل — تبقى النافذة مخفية في الصينية
+                    return;
+                }
+            }
+
             if (_mainWindow.WindowState == WindowState.Minimized)
             {
                 _mainWindow.WindowState = WindowState.Normal;

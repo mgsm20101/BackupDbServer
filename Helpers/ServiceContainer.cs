@@ -23,7 +23,9 @@ namespace BackupDbServer.Helpers
         private static DailyTaskService? _dailyTaskService;
         private static GoogleDriveServiceFixed? _googleDriveService;
         private static BackupRetentionPolicy? _retentionPolicy;
-        
+        private static AppLockManager? _appLock;
+        private static XmlMaintenanceService? _xmlMaintenanceService;
+
         // حالة التهيئة
         private static bool _isInitialized = false;
 
@@ -176,10 +178,10 @@ namespace BackupDbServer.Helpers
                         {
                             var settings = new BackupRetentionPolicy.RetentionSettings
                             {
-                                DailyRetentionDays = 7,      // آخر 7 أيام: جميع النسخ
-                                WeeklyRetentionWeeks = 4,    // 4 أسابيع: نسخة الجمعة
-                                MonthlyRetentionMonths = 12, // 12 شهر: نسخة أول الشهر
-                                DeleteOlderThanYear = false, // الاحتفاظ بالنسخ القديمة
+                                DailyRetentionDays = 7,      // آخر 7 أيام: جميع النسخ اليومية
+                                WeeklyRetentionWeeks = 52,   // 52 أسبوع: الاحتفاظ بنسخة كل جمعة لمدة سنة كاملة
+                                MonthlyRetentionMonths = 12, // 12 شهر: احتياطي (آخر جمعة بالشهر) لما بعد السنة
+                                DeleteOlderThanYear = false, // الاحتفاظ بالنسخ القديمة (آخر جمعة بالربع)
                                 WeeklyBackupDay = DayOfWeek.Friday
                             };
                             _retentionPolicy = new BackupRetentionPolicy(Logger, settings);
@@ -188,6 +190,42 @@ namespace BackupDbServer.Helpers
                     }
                 }
                 return _retentionPolicy;
+            }
+        }
+
+        /// <summary>
+        /// مدير قفل التطبيق بكلمة سر - Singleton
+        /// </summary>
+        public static AppLockManager AppLock
+        {
+            get
+            {
+                if (_appLock == null)
+                {
+                    lock (_lock)
+                    {
+                        _appLock ??= new AppLockManager();
+                    }
+                }
+                return _appLock;
+            }
+        }
+
+        /// <summary>
+        /// خدمة صيانة XmlPath (إيقاف/استرجاع عمل XML للعميل) - Singleton
+        /// </summary>
+        public static XmlMaintenanceService XmlMaintenance
+        {
+            get
+            {
+                if (_xmlMaintenanceService == null)
+                {
+                    lock (_lock)
+                    {
+                        _xmlMaintenanceService ??= new XmlMaintenanceService(Logger);
+                    }
+                }
+                return _xmlMaintenanceService;
             }
         }
 

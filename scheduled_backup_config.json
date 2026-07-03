@@ -12,9 +12,12 @@
   ],
   "DeleteOldBackups": true,
   "RetentionDays": 7,
+  "SelectedMinute": 0,
+  "SelectedHour": 0,
   "NotifyOnCompletion": true,
   "NotifyOnError": true,
   "NotificationEmail": "",
   "LastBackupTime": "2025-07-26T01:08:05.9921314+03:00",
-  "NextBackupTime": "2025-07-27T02:00:00+03:00"
+  "NextBackupTime": "2026-02-27T02:00:00+02:00",
+  "IsRuning": false
 }

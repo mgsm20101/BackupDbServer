@@ -5,32 +5,30 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BackupDbServer.Views"
         mc:Ignorable="d"
-        Title="إدارة المهام اليومية" Height="600" Width="900"
+        Title="إدارة المهام اليومية" Height="650" Width="1000"
         FlowDirection="RightToLeft"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource MainBackgroundBrush}"
+        Foreground="{StaticResource TextMainBrush}"
+        FontFamily="{StaticResource ModernFontFamily}">
 
-    <Window.Resources>
-        <Style TargetType="Button">
-            <Setter Property="Padding" Value="10,5"/>
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="FontSize" Value="12"/>
-        </Style>
-    </Window.Resources>
-
-    <Grid Margin="10">
+    <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- شريط العنوان -->
-        <Border Grid.Row="0" Background="#FF3F51B5" Padding="10" CornerRadius="4" Margin="0,0,0,10">
-            <TextBlock Text="📅 إدارة المهام اليومية المجدولة"
-                       FontSize="18"
-                       FontWeight="Bold"
-                       Foreground="White"
-                       HorizontalAlignment="Center"/>
+        <!-- شريط العنوان المحدث -->
+        <Border Grid.Row="0" Style="{StaticResource ModernCardStyle}" Margin="0,0,0,16" Background="{StaticResource SurfaceBrush}" Padding="15">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Path Data="{StaticResource Icon.History}" Fill="{StaticResource PrimaryAccentBrush}" Width="24" Height="24" Stretch="Uniform" Margin="0,0,12,0"/>
+                <TextBlock Text="إدارة المهام اليومية المجدولة" 
+                           Style="{StaticResource ModernHeaderStyle}"
+                           FontSize="20" 
+                           VerticalAlignment="Center"
+                           Margin="0"/>
+            </StackPanel>
         </Border>
 
         <!-- المحتوى الرئيسي -->
@@ -40,99 +38,140 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- ملاحظة توضيحية -->
-            <Border Grid.Column="0" Background="#FFFFEB3B" Padding="8" Margin="0,0,0,5" CornerRadius="3">
-                <TextBlock Text="💡 يمكن إضافة عدة مهام بأوقات تنفيذ مختلفة في نفس اليوم" 
-                           FontSize="11" Foreground="#FF000000" TextWrapping="Wrap"/>
-            </Border>
-            
-            <!-- قائمة المهام -->
-            <DataGrid Grid.Column="0" 
-                      ItemsSource="{Binding Tasks}"
-                      SelectedItem="{Binding SelectedTask}"
-                      AutoGenerateColumns="False"
-                      CanUserAddRows="False"
-                      IsReadOnly="True"
-                      SelectionMode="Single"
-                      Margin="0,30,10,0"
-                      GridLinesVisibility="Horizontal"
-                      AlternatingRowBackground="LightGray">
-                <DataGrid.Columns>
-                    <DataGridCheckBoxColumn Header="مفعل" Binding="{Binding IsEnabled}" Width="60"/>
-                    <DataGridTextColumn Header="اسم المهمة" Binding="{Binding TaskName}" Width="*"/>
-                    <DataGridTextColumn Header="قاعدة البيانات" Binding="{Binding DatabaseName}" Width="150"/>
-                    <DataGridTextColumn Header="نوع المهمة" Binding="{Binding Type}" Width="120"/>
-                    <DataGridTextColumn Header="وقت التنفيذ" Binding="{Binding ExecutionTime, StringFormat='HH:mm'}" Width="100"/>
-                    <DataGridTextColumn Header="الوقت المتبقي" Binding="{Binding TimeUntilNextRun}" Width="120">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="FontWeight" Value="Bold"/>
-                                <Setter Property="Foreground" Value="#FF2196F3"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="آخر تنفيذ" Binding="{Binding LastExecutionTime, StringFormat='yyyy-MM-dd HH:mm'}" Width="150"/>
-                    <DataGridTemplateColumn Header="الحالة" Width="80">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock HorizontalAlignment="Center" FontWeight="Bold">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="✅ نجح"/>
-                                            <Setter Property="Foreground" Value="Green"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding LastExecutionSuccess}" Value="False">
-                                                    <Setter Property="Text" Value="❌ فشل"/>
-                                                    <Setter Property="Foreground" Value="Red"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding LastExecutionTime}" Value="{x:Null}">
-                                                    <Setter Property="Text" Value="⏳ جديد"/>
-                                                    <Setter Property="Foreground" Value="Gray"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- ملاحظة توضيحية -->
+                <Border Grid.Row="0" Background="#1E1B00" BorderBrush="#88FFFF00" BorderThickness="1" Padding="12" Margin="0,0,16,16" CornerRadius="8">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="💡" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="يمكن إضافة عدة مهام بأوقات تنفيذ مختلفة في نفس اليوم" 
+                                   FontSize="13" Foreground="#FFFFEB3B" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- قائمة المهام -->
+                <DataGrid Grid.Row="1" 
+                          Style="{StaticResource ModernDataGridStyle}"
+                          ItemsSource="{Binding Tasks}"
+                          SelectedItem="{Binding SelectedTask}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          IsReadOnly="True"
+                          SelectionMode="Single"
+                          Margin="0,0,16,0">
+                    <DataGrid.Columns>
+                        <DataGridCheckBoxColumn Header="مفعل" Binding="{Binding IsEnabled}" Width="70">
+                            <DataGridCheckBoxColumn.ElementStyle>
+                                <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridCheckBoxColumn.ElementStyle>
+                        </DataGridCheckBoxColumn>
+                        <DataGridTextColumn Header="اسم المهمة" Binding="{Binding TaskName}" Width="*"/>
+                        <DataGridTextColumn Header="قاعدة البيانات" Binding="{Binding DatabaseName}" Width="150"/>
+                        <DataGridTextColumn Header="نوع المهمة" Binding="{Binding Type}" Width="120"/>
+                        <DataGridTextColumn Header="الجدولة" Binding="{Binding ScheduleDescription}" Width="120"/>
+                        <DataGridTextColumn Header="الوقت المتبقي" Binding="{Binding TimeUntilNextRun}" Width="130">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Setter Property="Foreground" Value="{StaticResource PrimaryAccentBrush}"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="Padding" Value="8,4"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="آخر تنفيذ" Binding="{Binding LastExecutionTime, StringFormat='yyyy-MM-dd HH:mm'}" Width="150"/>
+                        <DataGridTemplateColumn Header="الحالة" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="12" Padding="8,4" Margin="4">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#1A2E1A"/> <!-- Dark Green -->
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding LastExecutionSuccess}" Value="False">
+                                                        <Setter Property="Background" Value="#2E1A1A"/> <!-- Dark Red -->
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding LastExecutionTime}" Value="{x:Null}">
+                                                        <Setter Property="Background" Value="#1E1E1E"/> <!-- Dark Grey -->
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock HorizontalAlignment="Center" FontWeight="Bold" FontSize="11">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="✅ نجح"/>
+                                                    <Setter Property="Foreground" Value="#4CAF50"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding LastExecutionSuccess}" Value="False">
+                                                            <Setter Property="Text" Value="❌ فشل"/>
+                                                            <Setter Property="Foreground" Value="#F44336"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding LastExecutionTime}" Value="{x:Null}">
+                                                            <Setter Property="Text" Value="⏳ جديد"/>
+                                                            <Setter Property="Foreground" Value="#9E9E9E"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
 
             <!-- أزرار التحكم -->
-            <StackPanel Grid.Column="1" Margin="0">
-                <Button Content="➕ إضافة مهمة" 
-                        Command="{Binding AddTaskCommand}"
-                        Background="#FF4CAF50" 
-                        Foreground="White"
-                        FontWeight="Bold"/>
+            <StackPanel Grid.Column="1" Width="180">
+                <Button Command="{Binding AddTaskCommand}" Style="{StaticResource ModernActionButtonStyle}" Height="45" Margin="0,0,0,12">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource Icon.Settings}" Fill="{StaticResource MainBackgroundBrush}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                        <TextBlock Text="إضافة مهمة" FontWeight="Bold"/>
+                    </StackPanel>
+                </Button>
                 
-                <Button Content="✏ تعديل" 
-                        Command="{Binding EditTaskCommand}"
-                        Background="#FF2196F3" 
-                        Foreground="White"/>
+                <Button Command="{Binding EditTaskCommand}" Style="{StaticResource ModernActionButtonStyle}" Height="40" Margin="0,0,0,12">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource Icon.Settings}" Fill="{StaticResource MainBackgroundBrush}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0"/>
+                        <TextBlock Text="تعديل"/>
+                    </StackPanel>
+                </Button>
                 
-                <Button Content="🗑 حذف" 
-                        Command="{Binding DeleteTaskCommand}"
-                        Background="#FFF44336" 
-                        Foreground="White"/>
+                <Button Command="{Binding DeleteTaskCommand}" Style="{StaticResource ModernActionButtonStyle}" Height="40" Margin="0,0,0,12" Background="#C62828">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource Icon.Cancel}" Fill="{StaticResource MainBackgroundBrush}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0"/>
+                        <TextBlock Text="حذف"/>
+                    </StackPanel>
+                </Button>
                 
-                <Button Content="▶ اختبار" 
-                        Command="{Binding TestTaskCommand}"
-                        Background="#FFFF9800" 
-                        Foreground="White"/>
+                <Button Command="{Binding TestTaskCommand}" Style="{StaticResource ModernActionButtonStyle}" Height="40" Margin="0,0,0,12" Background="#E65100">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource Icon.Refresh}" Fill="{StaticResource MainBackgroundBrush}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0"/>
+                        <TextBlock Text="اختبار"/>
+                    </StackPanel>
+                </Button>
                 
-                <Separator Margin="5,10"/>
+                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0" Margin="0,8,0,20"/>
                 
-                <Button Content="🔄 تحديث" 
-                        Command="{Binding RefreshCommand}"
-                        Background="#FF607D8B" 
-                        Foreground="White"/>
+                <Button Command="{Binding RefreshCommand}" Style="{StaticResource ModernActionButtonStyle}" Height="40" Background="#37474F">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource Icon.Refresh}" Fill="{StaticResource MainBackgroundBrush}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0"/>
+                        <TextBlock Text="تحديث"/>
+                    </StackPanel>
+                </Button>
             </StackPanel>
         </Grid>
 
         <!-- شريط الحالة -->
-        <Border Grid.Row="2" Background="LightGray" Padding="10" CornerRadius="4" Margin="0,10,0,0">
+        <Border Grid.Row="2" Style="{StaticResource ModernCardStyle}" Margin="0,16,0,0" Padding="15">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -141,16 +180,17 @@
                 
                 <TextBlock Grid.Column="0"
                           Text="{Binding StatusMessage}"
-                          FontSize="12"
+                          Foreground="{StaticResource TextSubBrush}"
+                          FontSize="13"
                           VerticalAlignment="Center"/>
                 
-                <TextBlock Grid.Column="1"
-                          Text="{Binding ServiceStatus}"
-                          FontSize="12"
-                          FontWeight="Bold"
-                          VerticalAlignment="Center"
-                          Foreground="#FF3F51B5"
-                          Margin="10,0,0,0"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Path Data="{StaticResource Icon.Server}" Fill="{StaticResource PrimaryAccentBrush}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0"/>
+                    <TextBlock Text="{Binding ServiceStatus}"
+                              FontSize="13"
+                              FontWeight="Bold"
+                              Foreground="{StaticResource PrimaryAccentBrush}"/>
+                </StackPanel>
             </Grid>
         </Border>
     </Grid>
