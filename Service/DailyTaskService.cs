@@ -10,7 +10,7 @@ using System.Timers;
 using BackupDbServer.Helpers;
 using BackupDbServer.Models;
 
-namespace BackupDbServer.Service
+namespace BackupDbServer.Services
 {
     public class DailyTaskService : IDisposable
     {

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using BackupDbServer.Helpers;
 using BackupDbServer.Models;
-using BackupDbServer.Service;
+using BackupDbServer.Services;
 
 namespace BackupDbServer.ViewModels
 {

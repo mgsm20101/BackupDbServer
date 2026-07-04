@@ -5,7 +5,7 @@ using BackupDbServer.Helpers;
 using BackupDbServer.Models;
 using Microsoft.Data.SqlClient;
 
-namespace BackupDbServer.Service
+namespace BackupDbServer.Services
 {
     /// <summary>
     /// حالة صيانة الـ XmlPath لقاعدة بيانات معيّنة.

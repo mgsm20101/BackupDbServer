@@ -11,7 +11,7 @@ using Microsoft.Web.Administration;
 using BackupDbServer.Models;
 using BackupDbServer.Helpers;
 
-namespace BackupDbServer.Service
+namespace BackupDbServer.Services
 {
     public class DeployService
     {

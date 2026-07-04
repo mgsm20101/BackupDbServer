@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Forms;
 using BackupDbServer.Helpers;
 using BackupDbServer.Models;
-using BackupDbServer.Service;
+using BackupDbServer.Services;
 
 namespace BackupDbServer.ViewModels
 {

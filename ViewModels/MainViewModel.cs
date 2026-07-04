@@ -1,7 +1,6 @@
 ﻿using BackupDbServer.Helpers;
 using BackupDbServer.Models;
 using BackupDbServer.Services;
-using BackupDbServer.Service;
 using BackupDbServer.Views;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -1662,7 +1661,7 @@ namespace BackupDbServer.ViewModels
         {
             try
             {
-                var deployService = new Service.DeployService(_logger);
+                var deployService = new Services.DeployService(_logger);
                 var deployViewModel = new DeployViewModel(deployService, _logger);
                 var deployWindow = new automationIIs(deployViewModel);
                 deployWindow.ShowDialog();

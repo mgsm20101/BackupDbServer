@@ -8,7 +8,7 @@ using BackupDbServer.Helpers;
 using BackupDbServer.Models;
 using Microsoft.Web.Administration;
 
-namespace BackupDbServer.Service
+namespace BackupDbServer.Services
 {
     /// <summary>
     /// خدمة صيانة وتسريع IIS:
