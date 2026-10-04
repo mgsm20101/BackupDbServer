@@ -1,7 +1,7 @@
 # تعليمات نشر BackupDbServer (نسخة العميل)
 
 > دليل موثّق وقابل للتكرار لإنتاج نسخة نشر جاهزة للتسليم لدى العميل.
-> آخر تحديث: 2026-07-02 — الإصدار الحالي: **1.0.0**
+> آخر تحديث: 2026-10-04 — الإصدار الحالي: **1.0.1**
 
 ---
 
@@ -46,7 +46,7 @@ dotnet publish BackupDbServer.csproj `
   -p:PublishSingleFile=true `
   -p:IncludeNativeLibrariesForSelfExtract=true `
   -p:EnableCompressionInSingleFile=true `
-  -p:Version=1.0.0 -p:AssemblyVersion=1.0.0.0 -p:FileVersion=1.0.0.0 `
+  -p:Version=1.0.1 -p:AssemblyVersion=1.0.1.0 -p:FileVersion=1.0.1.0 `
   -p:DebugType=none -p:DebugSymbols=false `
   -o "publish/ClientRelease-x64"
 ```
@@ -60,7 +60,7 @@ dotnet publish BackupDbServer.csproj `
 Get-Item "publish/ClientRelease-x64/BackupDbServer.exe" | Select-Object Length
 (Get-Item "publish/ClientRelease-x64/BackupDbServer.exe").VersionInfo | Select-Object FileVersion, ProductVersion
 ```
-المتوقع: ملف واحد، `FileVersion = 1.0.0.0`.
+المتوقع: ملف واحد، `FileVersion = 1.0.1.0`.
 
 ---
 
