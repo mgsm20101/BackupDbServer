@@ -126,14 +126,14 @@ namespace BackupDbServer.Services
 
                 _logger.LogInformation($"سيتم نسخ {_config.SelectedDatabases.Count} قاعدة بيانات: {string.Join(", ", _config.SelectedDatabases)}");
 
-                var backupTasks = new List<Task<BackupScheduleEntry>>();
+                // نسخ القواعد بالتتابع: التشغيل المتوازي على نفس الـ disk يسبب I/O contention
+                // ويؤدي إلى timeout في RESTORE VERIFYONLY
+                var results = new List<BackupScheduleEntry>();
 
                 foreach (var dbName in _config.SelectedDatabases)
                 {
-                    backupTasks.Add(BackupDatabaseAsync(dbName));
+                    results.Add(await BackupDatabaseAsync(dbName));
                 }
-
-                var results = await Task.WhenAll(backupTasks);
 
                 // إضافة النتائج إلى التاريخ
                 foreach (var result in results)
@@ -152,7 +152,7 @@ namespace BackupDbServer.Services
                 await ScheduleNextBackup();
 
                 var successCount = results.Count(r => r.Status == "Success");
-                var message = $"اكتمل النسخ الاحتياطي: {successCount}/{results.Length} نجح";
+                var message = $"اكتمل النسخ الاحتياطي: {successCount}/{results.Count} نجح";
 
                 _logger.LogInformation(message);
                 OnStatusChanged(message);

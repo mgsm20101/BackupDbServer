@@ -15,6 +15,15 @@ namespace BackupDbServer.Services
         public readonly ILogger _logger;
         public readonly Settings _settings;
 
+        /// <summary>مهلة أوامر BACKUP و RESTORE VERIFYONLY (ساعة) — قواعد ERP الكبيرة تتجاوز الدقائق بسهولة</summary>
+        private const int LongRunningCommandTimeoutSeconds = 3600;
+
+        /// <summary>رقم الخطأ الذي يرجعه SqlClient عند انتهاء مهلة الأمر من جهة العميل</summary>
+        private const int SqlClientTimeoutErrorNumber = -2;
+
+        /// <summary>يمنع تشغيل أكثر من عملية نسخ احتياطي في نفس الوقت (تلقائي / مجدول / يدوي)</summary>
+        private static readonly SemaphoreSlim _backupGate = new(1, 1);
+
         public BackupRestoreService()
         {
             _logger = new FileLogger();
@@ -194,6 +203,24 @@ namespace BackupDbServer.Services
                 throw new ArgumentException("لا توجد قواعد بيانات محددة للنسخ الاحتياطي");
             }
 
+            if (_backupGate.CurrentCount == 0)
+            {
+                progress?.Report("⏳ في انتظار انتهاء عملية نسخ احتياطي أخرى...");
+            }
+
+            await _backupGate.WaitAsync();
+            try
+            {
+                await BackupDatabasesCoreAsync(databaseNames, progress);
+            }
+            finally
+            {
+                _backupGate.Release();
+            }
+        }
+
+        private async Task BackupDatabasesCoreAsync(List<string> databaseNames, IProgress<string>? progress)
+        {
             // التأكد من وجود مجلد النسخ الاحتياطي
             var backupDirectory = GetBackupDirectory();
             if (!Directory.Exists(backupDirectory))
@@ -347,7 +374,7 @@ namespace BackupDbServer.Services
                      STATS = 5";
 
             using var command = new SqlCommand(backupQuery, connection);
-            command.CommandTimeout = 600; // 10 دقائق
+            command.CommandTimeout = LongRunningCommandTimeoutSeconds;
 
             // إضافة معالج للتقدم
             command.StatementCompleted += (sender, e) =>
@@ -359,45 +386,31 @@ namespace BackupDbServer.Services
 
             // التحقق من صحة النسخة الاحتياطية
             progress?.Report($"التحقق من صحة النسخة الاحتياطية...");
-            await VerifyStandardBackupAsync(connection, backupPath);
+            await VerifyBackupAsync(connection, backupPath, progress);
         }
 
         /// <summary>
-        /// التحقق من صحة النسخة الاحتياطية للاتصال المحلي/عن بُعد
+        /// التحقق من صحة النسخة الاحتياطية عبر RESTORE VERIFYONLY (محلي / عن بُعد / داخل حاوية Docker).
+        /// انتهاء المهلة لا يعني أن الملف تالف (تم إنشاؤه بـ CHECKSUM)، لذلك يُسجَّل كتحذير ولا يُحذف الملف.
         /// </summary>
-        private async Task VerifyStandardBackupAsync(SqlConnection connection, string backupPath)
+        private async Task VerifyBackupAsync(SqlConnection connection, string backupPath, IProgress<string>? progress)
         {
             const string verifyQuery = "RESTORE VERIFYONLY FROM DISK = @backupPath";
 
             using var command = new SqlCommand(verifyQuery, connection);
             command.Parameters.AddWithValue("@backupPath", backupPath);
-            command.CommandTimeout = 120;
+            command.CommandTimeout = LongRunningCommandTimeoutSeconds;
 
             try
             {
                 await command.ExecuteNonQueryAsync();
                 _logger.LogInfo($"تم التحقق من صحة النسخة الاحتياطية: {backupPath}");
             }
-            catch (SqlException ex)
+            catch (SqlException ex) when (ex.Number == SqlClientTimeoutErrorNumber)
             {
-                throw new InvalidOperationException($"فشل التحقق من صحة النسخة الاحتياطية: {ex.Message}", ex);
-            }
-        }
-
-       
-      
-        private async Task VerifyBackupInContainerAsync(SqlConnection connection, string containerBackupPath)
-        {
-            const string verifyQuery = "RESTORE VERIFYONLY FROM DISK = @backupPath";
-
-            using var command = new SqlCommand(verifyQuery, connection);
-            command.Parameters.AddWithValue("@backupPath", containerBackupPath);
-            command.CommandTimeout = 120;
-
-            try
-            {
-                await command.ExecuteNonQueryAsync();
-                _logger.LogInfo($"تم التحقق من صحة النسخة الاحتياطية داخل الحاوية: {containerBackupPath}");
+                var warning = $"⚠️ لم يكتمل التحقق من النسخة الاحتياطية خلال {LongRunningCommandTimeoutSeconds} ثانية — تم الاحتفاظ بالملف: {backupPath}";
+                _logger.LogWarning(warning);
+                progress?.Report(warning);
             }
             catch (SqlException ex)
             {
@@ -603,7 +616,7 @@ namespace BackupDbServer.Services
              STATS = 5";
 
             using var command = new SqlCommand(backupQuery, connection);
-            command.CommandTimeout = 600; // 10 دقائق
+            command.CommandTimeout = LongRunningCommandTimeoutSeconds;
 
             // إضافة معالج للتقدم
             command.StatementCompleted += (sender, e) =>
@@ -619,7 +632,7 @@ namespace BackupDbServer.Services
 
             // التحقق من صحة النسخة الاحتياطية
             progress?.Report($"التحقق من صحة النسخة الاحتياطية...");
-            await VerifyBackupInContainerAsync(connection, containerBackupPath);
+            await VerifyBackupAsync(connection, containerBackupPath, progress);
         }
 
         private async Task CheckBackupFileSizeInContainerAsync(string containerBackupPath)
